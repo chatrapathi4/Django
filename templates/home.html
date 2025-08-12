@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SEM 3</title>
+</head>
+<body>
+    {% extends 'base.html' %}
+    {% block content %}
+    <div class="d-flex justify-content-center align-items-center" style="min-height: 80vh;">
+      <div class="card shadow" style="width: 22rem;">
+        <div class="card-body">
+          <h4 class="card-title text-center mb-4">Simple Calculator</h4>
+          <form action="add" method="post">
+            {% csrf_token %}
+            <div class="mb-3">
+              <label for="num1" class="form-label">Enter First Number:</label>
+              <input type="text" class="form-control" id="num1" name="num1" required>
+            </div>
+            <div class="mb-3">
+              <label for="num2" class="form-label">Enter Second Number:</label>
+              <input type="text" class="form-control" id="num2" name="num2" required>
+            </div>
+            <div class="d-grid">
+              <button type="submit" class="btn btn-primary">Submit</button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+    {% endblock %}
+</body>
+</html>

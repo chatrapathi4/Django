@@ -1,0 +1,906 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="container-fluid px-3 py-4">
+  <div class="row justify-content-center">
+    <div class="col-12 col-lg-10 col-xl-8">
+      
+      <!-- Header Section -->
+      <div class="text-center mb-4">
+        <h2 class="display-5 fw-bold text-gradient mb-2">🎬 Movie & TV Show Finder</h2>
+        <p class="text-muted fs-5">Discover amazing movies and TV shows tailored to your preferences</p>
+      </div>
+
+      <!-- Main Content Card -->
+      <div class="card shadow-lg border-0 main-card">
+        <div class="card-body p-4">
+          
+          <!-- Recommendation Display Area -->
+          <div class="row mb-4">
+            <div class="col-12">
+              <div id="movieContainer" class="movie-display position-relative">
+                <div id="loadingText" class="loading-content">
+                  <div class="movie-animation">
+                    🎭
+                  </div>
+                  <h5 class="loading-title">Ready to Watch!</h5>
+                  <p class="loading-subtitle">Set your preferences and discover your next favorite movie or show</p>
+                </div>
+                <div id="movieContent" class="movie-content" style="display: none;">
+                  <div class="row">
+                    <div class="col-md-4 mb-3">
+                      <div class="movie-poster">
+                        <div id="posterImage" class="poster-placeholder">
+                          <i class="fas fa-film poster-icon"></i>
+                        </div>
+                        <div class="rating-display">
+                          <span id="ratingStars" class="stars"></span>
+                          <span id="ratingScore" class="rating-text">0.0</span>
+                        </div>
+                      </div>
+                    </div>
+                    <div class="col-md-8">
+                      <div class="movie-info">
+                        <div class="movie-header">
+                          <h3 id="movieTitle" class="movie-title"></h3>
+                          <div class="movie-badges">
+                            <span id="typeTag" class="badge type-badge"></span>
+                            <span id="yearTag" class="badge year-badge"></span>
+                            <span id="genreTag" class="badge genre-badge"></span>
+                          </div>
+                        </div>
+                        <div class="movie-details">
+                          <p id="movieDescription" class="description-text"></p>
+                          <div class="meta-info">
+                            <div class="row">
+                              <div class="col-sm-6">
+                                <small><i class="fas fa-user-tie me-1"></i><strong>Director:</strong> <span id="directorName"></span></small>
+                              </div>
+                              <div class="col-sm-6">
+                                <small><i class="fas fa-clock me-1"></i><strong>Duration:</strong> <span id="duration"></span></small>
+                              </div>
+                              <div class="col-12 mt-2">
+                                <small><i class="fas fa-users me-1"></i><strong>Cast:</strong> <span id="castList"></span></small>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="row mt-3">
+                    <div class="col-12">
+                      <div class="action-buttons-inline">
+                        <button class="btn btn-outline-primary btn-sm" onclick="addToWatchlist()">
+                          <i class="fas fa-plus me-1"></i>Add to Watchlist
+                        </button>
+                        <button class="btn btn-outline-success btn-sm" onclick="markAsWatched()">
+                          <i class="fas fa-check me-1"></i>Mark as Watched
+                        </button>
+                        <button class="btn btn-outline-info btn-sm" onclick="shareMovie()">
+                          <i class="fas fa-share me-1"></i>Share
+                        </button>
+                        <button class="btn btn-outline-warning btn-sm" onclick="openTrailer()">
+                          <i class="fas fa-play me-1"></i>Find Trailer
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Filters Section -->
+          <div class="row mb-4">
+            <div class="col-md-6 mb-3">
+              <label class="form-label fw-semibold">
+                <i class="fas fa-tags me-2"></i>Genre Preference
+              </label>
+              <select id="genreFilter" class="form-select custom-select">
+                <option value="any">🎯 Any Genre</option>
+                <option value="action">⚔️ Action</option>
+                <option value="comedy">😂 Comedy</option>
+                <option value="drama">🎭 Drama</option>
+                <option value="horror">👻 Horror</option>
+                <option value="romance">💕 Romance</option>
+                <option value="sci-fi">🚀 Sci-Fi</option>
+                <option value="fantasy">🧙‍♂️ Fantasy</option>
+                <option value="thriller">😱 Thriller</option>
+                <option value="crime">🕵️ Crime</option>
+                <option value="adventure">🗺️ Adventure</option>
+                <option value="animation">🎨 Animation</option>
+                <option value="documentary">📹 Documentary</option>
+              </select>
+            </div>
+            <div class="col-md-6 mb-3">
+              <label class="form-label fw-semibold">
+                <i class="fas fa-tv me-2"></i>Content Type
+              </label>
+              <select id="typeFilter" class="form-select custom-select">
+                <option value="any">📺 Any Type</option>
+                <option value="movie">🎬 Movies</option>
+                <option value="tv">📺 TV Shows</option>
+              </select>
+            </div>
+            <div class="col-md-6 mb-3">
+              <label class="form-label fw-semibold">
+                <i class="fas fa-calendar me-2"></i>Release Period
+              </label>
+              <select id="yearFilter" class="form-select custom-select">
+                <option value="any">📅 Any Year</option>
+                <option value="recent">🆕 Recent (2020+)</option>
+                <option value="2010">📱 2010s Era</option>
+                <option value="2000">💿 2000s Era</option>
+                <option value="classic">🎞️ Classic (Pre-2000)</option>
+              </select>
+            </div>
+            <div class="col-md-6 mb-3">
+              <label class="form-label fw-semibold">
+                <i class="fas fa-star me-2"></i>Minimum Rating
+              </label>
+              <select id="ratingFilter" class="form-select custom-select">
+                <option value="any">⭐ Any Rating</option>
+                <option value="9.0">⭐⭐⭐⭐⭐ 9.0+ (Masterpiece)</option>
+                <option value="8.5">⭐⭐⭐⭐ 8.5+ (Excellent)</option>
+                <option value="8.0">⭐⭐⭐ 8.0+ (Very Good)</option>
+                <option value="7.0">⭐⭐ 7.0+ (Good)</option>
+              </select>
+            </div>
+          </div>
+
+          <!-- Action Buttons -->
+          <div class="row mb-4">
+            <div class="col-12">
+              <div class="button-grid">
+                <!-- Primary Generate Button -->
+                <button type="button" class="btn btn-primary btn-lg generate-btn" onclick="findMovie()">
+                  <i class="fas fa-search me-2"></i>Find Something to Watch
+                </button>
+                
+                <!-- Secondary Actions -->
+                <div class="secondary-buttons">
+                  <button type="button" class="btn btn-outline-info action-btn" onclick="surpriseMe()">
+                    <i class="fas fa-dice me-2"></i>Surprise Me
+                  </button>
+                  <button type="button" class="btn btn-outline-warning action-btn" onclick="resetFilters()">
+                    <i class="fas fa-undo me-2"></i>Reset Filters
+                  </button>
+                  <button type="button" class="btn btn-outline-secondary action-btn" onclick="viewWatchlist()">
+                    <i class="fas fa-list me-2"></i>My Watchlist
+                  </button>
+                  <button type="button" class="btn btn-outline-danger action-btn" onclick="resetStats()">
+                    <i class="fas fa-trash me-2"></i>Reset Stats
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Viewing Stats -->
+          <div class="row mb-4">
+            <div class="col-12">
+              <div class="stats-panel">
+                <h6 class="stats-title mb-3"><i class="fas fa-chart-line me-2"></i>Viewing Statistics</h6>
+                <div class="row text-center">
+                  <div class="col-6 col-md-3">
+                    <div class="stat-item">
+                      <span class="stat-number" id="discoveredCount">0</span>
+                      <span class="stat-label">Discovered</span>
+                    </div>
+                  </div>
+                  <div class="col-6 col-md-3">
+                    <div class="stat-item">
+                      <span class="stat-number" id="watchlistCount">0</span>
+                      <span class="stat-label">Watchlist</span>
+                    </div>
+                  </div>
+                  <div class="col-6 col-md-3">
+                    <div class="stat-item">
+                      <span class="stat-number" id="watchedCount">0</span>
+                      <span class="stat-label">Watched</span>
+                    </div>
+                  </div>
+                  <div class="col-6 col-md-3">
+                    <div class="stat-item">
+                      <span class="stat-number" id="favoriteGenre">-</span>
+                      <span class="stat-label">Top Genre</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Footer Navigation -->
+          <div class="row">
+            <div class="col-12 text-center">
+              <a href="{% url 'home' %}" class="btn btn-outline-dark btn-sm back-btn">
+                <i class="fas fa-arrow-left me-2"></i>Back to Home
+              </a>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- Info Cards -->
+      <div class="row mt-4">
+        <div class="col-md-4 mb-3">
+          <div class="card info-card border-0">
+            <div class="card-body text-center">
+              <i class="fas fa-database text-primary mb-2" style="font-size: 2rem;"></i>
+              <h6 class="card-title">Multiple Sources</h6>
+              <small class="text-muted">Powered by TMDB, OMDB, and curated recommendations</small>
+            </div>
+          </div>
+        </div>
+        <div class="col-md-4 mb-3">
+          <div class="card info-card border-0">
+            <div class="card-body text-center">
+              <i class="fas fa-heart text-danger mb-2" style="font-size: 2rem;"></i>
+              <h6 class="card-title">Personal Watchlist</h6>
+              <small class="text-muted">Save and track your viewing list with personalized recommendations</small>
+            </div>
+          </div>
+        </div>
+        <div class="col-md-4 mb-3">
+          <div class="card info-card border-0">
+            <div class="card-body text-center">
+              <i class="fas fa-filter text-success mb-2" style="font-size: 2rem;"></i>
+              <h6 class="card-title">Smart Filtering</h6>
+              <small class="text-muted">Filter by genre, type, year, and rating for perfect matches</small>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<style>
+/* Modern Styling for Movie & TV Show Recommendations */
+.text-gradient {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.main-card {
+  border-radius: 20px;
+  background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+  overflow: hidden;
+}
+
+.dark-theme .main-card {
+  background: linear-gradient(135deg, #2c3e50 0%, #3498db 100%);
+}
+
+.movie-display {
+  min-height: 400px;
+  border-radius: 15px;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.1);
+  transition: all 0.3s ease;
+  padding: 2rem;
+}
+
+.movie-display:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 12px 40px rgba(0,0,0,0.15);
+}
+
+.loading-content {
+  text-align: center;
+  color: white;
+}
+
+.movie-animation {
+  font-size: 4rem;
+  animation: movieReel 3s infinite;
+  margin-bottom: 1rem;
+}
+
+@keyframes movieReel {
+  0%, 100% { transform: rotate(0deg); }
+  50% { transform: rotate(180deg); }
+}
+
+.loading-title {
+  font-weight: 600;
+  margin-bottom: 0.5rem;
+  font-size: 1.5rem;
+}
+
+.loading-subtitle {
+  margin-bottom: 0;
+  opacity: 0.9;
+  font-size: 1rem;
+}
+
+.movie-content {
+  width: 100%;
+  color: white;
+  animation: fadeIn 0.5s ease;
+}
+
+.movie-poster {
+  text-align: center;
+}
+
+.poster-placeholder {
+  width: 100%;
+  height: 250px;
+  background: linear-gradient(135deg, #FF6B6B, #FF8E8E);
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 1rem;
+  box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+}
+
+.poster-icon {
+  font-size: 4rem;
+  color: white;
+  opacity: 0.8;
+}
+
+.rating-display {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+}
+
+.stars {
+  font-size: 1.2rem;
+}
+
+.rating-text {
+  font-weight: 600;
+  font-size: 1.1rem;
+}
+
+.movie-header {
+  margin-bottom: 1rem;
+}
+
+.movie-title {
+  font-size: 1.8rem;
+  font-weight: 700;
+  margin-bottom: 0.5rem;
+  color: #ffffff;
+}
+
+.movie-badges {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+  margin-bottom: 1rem;
+}
+
+.type-badge {
+  background: linear-gradient(135deg, #FF6B6B, #FF8E8E);
+}
+
+.year-badge {
+  background: linear-gradient(135deg, #4ECDC4, #44A08D);
+}
+
+.genre-badge {
+  background: linear-gradient(135deg, #A8E6CF, #7FCDCD);
+}
+
+.description-text {
+  font-size: 1rem;
+  line-height: 1.6;
+  margin-bottom: 1rem;
+  opacity: 0.95;
+}
+
+.meta-info {
+  background: rgba(255,255,255,0.1);
+  border-radius: 8px;
+  padding: 1rem;
+  margin-bottom: 1rem;
+}
+
+.meta-info small {
+  display: block;
+  margin-bottom: 0.5rem;
+  opacity: 0.9;
+}
+
+.action-buttons-inline {
+  display: flex;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.custom-select {
+  border-radius: 10px;
+  border: 2px solid transparent;
+  background: white;
+  padding: 0.75rem 1rem;
+  font-weight: 500;
+  transition: all 0.2s ease;
+}
+
+.custom-select:focus {
+  border-color: #667eea;
+  box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.25);
+  background: white;
+}
+
+.dark-theme .custom-select {
+  background: #2c3e50;
+  color: white;
+  border-color: #34495e;
+}
+
+.button-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.generate-btn {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  border: none;
+  border-radius: 12px;
+  padding: 1rem 2rem;
+  font-weight: 600;
+  font-size: 1.1rem;
+  transition: all 0.3s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.generate-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4);
+}
+
+.generate-btn:active {
+  transform: translateY(0);
+}
+
+.secondary-buttons {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: 0.75rem;
+}
+
+.action-btn {
+  border-radius: 10px;
+  padding: 0.75rem 1rem;
+  font-weight: 500;
+  transition: all 0.2s ease;
+  border-width: 2px;
+}
+
+.action-btn:hover {
+  transform: translateY(-1px);
+}
+
+.stats-panel {
+  background: rgba(255,255,255,0.9);
+  border-radius: 12px;
+  padding: 1.5rem;
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255,255,255,0.2);
+}
+
+.dark-theme .stats-panel {
+  background: rgba(0,0,0,0.3);
+  border: 1px solid rgba(255,255,255,0.1);
+}
+
+.stats-title {
+  color: #667eea;
+  font-weight: 600;
+}
+
+.dark-theme .stats-title {
+  color: #a8e6cf;
+}
+
+.stat-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.stat-number {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #667eea;
+}
+
+.stat-label {
+  font-size: 0.875rem;
+  color: #666;
+  margin-top: 0.25rem;
+}
+
+.dark-theme .stat-label {
+  color: #ccc;
+}
+
+.back-btn {
+  border-radius: 20px;
+  padding: 0.5rem 1.5rem;
+  font-weight: 500;
+  transition: all 0.2s ease;
+}
+
+.info-card {
+  background: rgba(255,255,255,0.8);
+  backdrop-filter: blur(10px);
+  border-radius: 12px;
+  transition: transform 0.2s ease;
+}
+
+.info-card:hover {
+  transform: translateY(-3px);
+}
+
+.dark-theme .info-card {
+  background: rgba(0,0,0,0.2);
+}
+
+/* Success state styling */
+.movie-display.loaded {
+  background: linear-gradient(135deg, #56ab2f 0%, #a8e6cf 100%);
+}
+
+/* Animation for content loading */
+@keyframes fadeIn {
+  from { opacity: 0; transform: scale(0.95); }
+  to { opacity: 1; transform: scale(1); }
+}
+
+/* Responsive Adjustments */
+@media (max-width: 768px) {
+  .movie-display {
+    min-height: 350px;
+    padding: 1rem;
+  }
+  
+  .movie-title {
+    font-size: 1.4rem;
+  }
+  
+  .poster-placeholder {
+    height: 200px;
+  }
+  
+  .secondary-buttons {
+    grid-template-columns: 1fr;
+  }
+  
+  .generate-btn {
+    padding: 0.875rem 1.5rem;
+    font-size: 1rem;
+  }
+
+  .action-buttons-inline {
+    justify-content: center;
+    flex-direction: column;
+  }
+}
+
+@media (max-width: 576px) {
+  .movie-badges {
+    justify-content: center;
+  }
+  
+  .badge {
+    font-size: 0.8rem;
+    padding: 0.3rem 0.6rem;
+  }
+  
+  .display-5 {
+    font-size: 1.8rem;
+  }
+}
+</style>
+
+<script>
+/* Movie & TV Show Recommendation System */
+(function() {
+  let currentMovie = null;
+  let discoveredCount = parseInt(localStorage.getItem('movieDiscoveredCount') || '0');
+  let watchlistCount = parseInt(localStorage.getItem('movieWatchlistCount') || '0');
+  let watchedCount = parseInt(localStorage.getItem('movieWatchedCount') || '0');
+  let genreStats = JSON.parse(localStorage.getItem('movieGenreStats') || '{}');
+  let watchlist = JSON.parse(localStorage.getItem('movieWatchlist') || '[]');
+
+  function updateStats() {
+    document.getElementById('discoveredCount').textContent = discoveredCount;
+    document.getElementById('watchlistCount').textContent = watchlistCount;
+    document.getElementById('watchedCount').textContent = watchedCount;
+    
+    // Find most popular genre
+    const topGenre = Object.keys(genreStats).reduce((a, b) => 
+      genreStats[a] > genreStats[b] ? a : b, 'None'
+    );
+    document.getElementById('favoriteGenre').textContent = topGenre || '-';
+    
+    // Save to localStorage
+    localStorage.setItem('movieDiscoveredCount', discoveredCount.toString());
+    localStorage.setItem('movieWatchlistCount', watchlistCount.toString());
+    localStorage.setItem('movieWatchedCount', watchedCount.toString());
+    localStorage.setItem('movieGenreStats', JSON.stringify(genreStats));
+    localStorage.setItem('movieWatchlist', JSON.stringify(watchlist));
+  }
+
+  function showLoading(show = true, message = 'Searching for perfect entertainment...') {
+    const loading = document.getElementById('loadingText');
+    const content = document.getElementById('movieContent');
+    const container = document.getElementById('movieContainer');
+    
+    if (show) {
+      loading.style.display = 'block';
+      content.style.display = 'none';
+      container.className = 'movie-display position-relative';
+      loading.innerHTML = `
+        <div class="movie-animation">🎭</div>
+        <h5 class="loading-title">${message}</h5>
+        <p class="loading-subtitle">Finding your next favorite watch...</p>
+      `;
+    } else {
+      loading.style.display = 'none';
+      content.style.display = 'block';
+      container.classList.add('loaded');
+    }
+  }
+
+  function generateStars(rating) {
+    const fullStars = Math.floor(rating / 2);
+    const halfStar = (rating % 2) >= 1;
+    let stars = '';
+    
+    for (let i = 0; i < fullStars; i++) {
+      stars += '⭐';
+    }
+    if (halfStar) stars += '⭐';
+    
+    return stars;
+  }
+
+  function displayMovie(movie) {
+    document.getElementById('movieTitle').textContent = movie.title;
+    document.getElementById('movieDescription').textContent = movie.description;
+    document.getElementById('directorName').textContent = movie.director;
+    document.getElementById('duration').textContent = movie.duration;
+    document.getElementById('castList').textContent = Array.isArray(movie.cast) ? movie.cast.join(', ') : movie.cast;
+    
+    // Update tags
+    document.getElementById('typeTag').textContent = movie.type.toUpperCase();
+    document.getElementById('yearTag').textContent = movie.year.toString();
+    document.getElementById('genreTag').textContent = movie.genre.toUpperCase();
+    
+    // Update rating
+    document.getElementById('ratingStars').textContent = generateStars(movie.rating);
+    document.getElementById('ratingScore').textContent = movie.rating.toFixed(1);
+    
+    // Update poster if available
+    const posterImg = document.getElementById('posterImage');
+    if (movie.poster_url) {
+      posterImg.innerHTML = `<img src="${movie.poster_url}" alt="${movie.title}" style="width: 100%; height: 100%; object-fit: cover; border-radius: 12px;">`;
+    } else {
+      posterImg.innerHTML = '<i class="fas fa-film poster-icon"></i>';
+    }
+  }
+
+  window.findMovie = async function() {
+    showLoading(true);
+    
+    try {
+      const genre = document.getElementById('genreFilter').value;
+      const type = document.getElementById('typeFilter').value;
+      const year = document.getElementById('yearFilter').value;
+      const rating = document.getElementById('ratingFilter').value;
+      
+      const params = new URLSearchParams({
+        genre: genre,
+        type: type,
+        year: year,
+        rating: rating
+      });
+      
+      const response = await fetch(`/api/movies/?${params}`);
+      
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || `Server error: ${response.status}`);
+      }
+      
+      const movieData = await response.json();
+      currentMovie = movieData;
+      
+      // Update stats
+      discoveredCount++;
+      genreStats[movieData.genre] = (genreStats[movieData.genre] || 0) + 1;
+      updateStats();
+      
+      showLoading(false);
+      displayMovie(movieData);
+      
+    } catch (error) {
+      console.error('Error finding movie:', error);
+      showLoading(false);
+      document.getElementById('loadingText').innerHTML = `
+        <div class="text-center">
+          <i class="fas fa-exclamation-triangle mb-3" style="font-size: 3rem;"></i>
+          <h5 class="loading-title">Oops! Something went wrong</h5>
+          <p class="loading-subtitle">${error.message}</p>
+          <button class="btn btn-outline-light btn-sm mt-2" onclick="findMovie()">
+            <i class="fas fa-redo me-1"></i>Try Again
+          </button>
+        </div>
+      `;
+    }
+  };
+
+  window.surpriseMe = function() {
+    // Reset all filters to 'any'
+    document.getElementById('genreFilter').value = 'any';
+    document.getElementById('typeFilter').value = 'any';
+    document.getElementById('yearFilter').value = 'any';
+    document.getElementById('ratingFilter').value = 'any';
+    findMovie();
+  };
+
+  window.resetFilters = function() {
+    document.getElementById('genreFilter').value = 'any';
+    document.getElementById('typeFilter').value = 'any';
+    document.getElementById('yearFilter').value = 'any';
+    document.getElementById('ratingFilter').value = 'any';
+    showNotification('Filters reset successfully!', 'info');
+  };
+
+  window.addToWatchlist = function() {
+    if (!currentMovie) {
+      showNotification('No movie to save! Find one first.', 'warning');
+      return;
+    }
+
+    // Check if already in watchlist
+    if (watchlist.some(item => item.title === currentMovie.title)) {
+      showNotification('Already in your watchlist!', 'info');
+      return;
+    }
+
+    watchlist.push({
+      ...currentMovie,
+      addedAt: new Date().toISOString()
+    });
+    
+    watchlistCount++;
+    updateStats();
+    
+    showNotification('Added to watchlist!', 'success');
+  };
+
+  window.markAsWatched = function() {
+    if (!currentMovie) {
+      showNotification('No movie to mark! Find one first.', 'warning');
+      return;
+    }
+
+    watchedCount++;
+    updateStats();
+    
+    showNotification('Marked as watched! 🍿', 'success');
+  };
+
+  window.shareMovie = function() {
+    if (!currentMovie) {
+      showNotification('No movie to share! Find one first.', 'warning');
+      return;
+    }
+
+    const shareText = `🎬 Check out this ${currentMovie.type}: "${currentMovie.title}" (${currentMovie.year})\n\nDirector: ${currentMovie.director}\n${currentMovie.description}\n\n⭐ Rating: ${currentMovie.rating}/10\n🎭 Genre: ${currentMovie.genre}`;
+
+    if (navigator.share) {
+      navigator.share({
+        title: currentMovie.title,
+        text: shareText,
+        url: window.location.href
+      });
+    } else {
+      navigator.clipboard.writeText(shareText).then(() => {
+        showNotification('Movie details copied to clipboard!', 'success');
+      });
+    }
+  };
+
+  window.openTrailer = function() {
+    if (!currentMovie) {
+      showNotification('No movie selected! Find one first.', 'warning');
+      return;
+    }
+
+    const searchQuery = encodeURIComponent(`${currentMovie.title} ${currentMovie.year} trailer`);
+    const youtubeUrl = `https://www.youtube.com/results?search_query=${searchQuery}`;
+    window.open(youtubeUrl, '_blank');
+    
+    showNotification('Opening YouTube search for trailer...', 'info');
+  };
+
+  window.viewWatchlist = function() {
+    if (watchlist.length === 0) {
+      showNotification('Your watchlist is empty! Add some movies first.', 'info');
+      return;
+    }
+    
+    const titles = watchlist.map(item => `• ${item.title} (${item.year}) - ${item.type}`).join('\n');
+    alert(`🎬 Your Watchlist (${watchlist.length} items):\n\n${titles}`);
+  };
+
+  window.resetStats = function() {
+    if (confirm('Are you sure you want to reset all statistics and watchlist? This action cannot be undone.')) {
+      discoveredCount = 0;
+      watchlistCount = 0;
+      watchedCount = 0;
+      genreStats = {};
+      watchlist = [];
+      updateStats();
+      showNotification('All data reset successfully!', 'success');
+    }
+  };
+
+  function showNotification(message, type = 'info') {
+    const notification = document.createElement('div');
+    notification.className = `alert alert-${type === 'error' ? 'danger' : type} notification`;
+    notification.textContent = message;
+    notification.style.cssText = `
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      z-index: 9999;
+      animation: slideIn 0.3s ease;
+      max-width: 300px;
+    `;
+    
+    document.body.appendChild(notification);
+    setTimeout(() => {
+      notification.style.animation = 'slideOut 0.3s ease';
+      setTimeout(() => notification.remove(), 300);
+    }, 3000);
+  }
+
+  // Initialize
+  document.addEventListener('DOMContentLoaded', function() {
+    updateStats();
+  });
+
+  // Add CSS for notifications
+  const style = document.createElement('style');
+  style.textContent = `
+    @keyframes slideIn {
+      from { transform: translateX(100%); opacity: 0; }
+      to { transform: translateX(0); opacity: 1; }
+    }
+    @keyframes slideOut {
+      from { transform: translateX(0); opacity: 1; }
+      to { transform: translateX(100%); opacity: 0; }
+    }
+  `;
+  document.head.appendChild(style);
+
+})();
+</script>
+
+<!-- Font Awesome for icons -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+{% endblock %}

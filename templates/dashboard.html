@@ -1,14 +1,182 @@
 {% extends 'base.html' %}
 {% block content %}
-<div class="d-flex justify-content-center align-items-center" style="min-height: 80vh;">
-  <div class="card shadow" style="width: 22rem;">
-    <div class="card-body text-center">
-      <h4 class="card-title mb-4">Dashboard</h4>
-      <h1 class="mb-4">This is Dashboard</h1>
-      <a href="{% url 'home' %}">
-        <button type="button" class="btn btn-success">Home Window</button>
-      </a>
-    </div>
-  </div>
+<style>
+.section-title {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: #667eea;
+    margin-top: 2rem;
+    margin-bottom: 1rem;
+    text-align: center;
+    letter-spacing: 0.5px;
+}
+.table.custom-table {
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 4px 16px rgba(102,126,234,0.08);
+    background: #fff;
+    max-width: 600px;
+    margin-left: auto;
+    margin-right: auto;
+    margin-bottom: 2rem;
+}
+.table.custom-table th {
+    background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+    color: #fff;
+    font-weight: 600;
+    border: none;
+    font-size: 1.1rem;
+    text-align: center;
+}
+.table.custom-table td {
+    background: #f5f7fa;
+    color: #222;
+    border: none;
+    font-size: 1rem;
+    text-align: center;
+    vertical-align: middle;
+}
+.table.custom-table tr:nth-child(even) td {
+    background: #e9ecef;
+}
+.table.custom-table tr:hover td {
+    background: #d6e0f5;
+}
+@media (max-width: 700px) {
+    .table.custom-table {
+        max-width: 98vw;
+        font-size: 0.95rem;
+    }
+    .section-title {
+        font-size: 1.15rem;
+    }
+}
+.search-box {
+    max-width: 400px;
+    margin: 1rem auto 2rem auto;
+    display: flex;
+    gap: 0.5rem;
+}
+.search-box input {
+    border-radius: 8px;
+    border: 1px solid #667eea;
+    padding: 0.5rem 1rem;
+    width: 100%;
+}
+.search-box button {
+    border-radius: 8px;
+    background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+    color: #fff;
+    border: none;
+    padding: 0.5rem 1.2rem;
+    font-weight: 600;
+    transition: background 0.2s;
+}
+.search-box button:hover {
+    background: linear-gradient(90deg, #764ba2 0%, #667eea 100%);
+}
+</style>
+
+<div class="search-box">
+    <input type="text" id="tableSearch" placeholder="🔍 Search customers or products..." onkeyup="filterTables()">
+    <button onclick="document.getElementById('tableSearch').value='';filterTables();">Clear</button>
 </div>
+
+<div>
+    <div class="section-title"><span>👤 Customers</span></div>
+    <table class="table custom-table" id="customerTable">
+        <tr>
+            <th title="Customer Name">Name</th>
+            <th title="Customer Age">Age</th>
+            <th>URL</th>
+        </tr>
+        {% for customer in customers %}
+        <tr>
+            <td>{{ customer.name }}</td>
+            <td>{{ customer.age }}</td>
+            <td><a href="{% url 'customer' customer.id %}">View</a></td>
+        </tr>
+        {% empty %}
+        <tr>
+            <td colspan="2">No customers found.</td>
+        </tr>
+        {% endfor %}
+    </table>
+</div>
+
+<div>
+    <div class="section-title"><span>🛒 Products</span></div>
+    <table class="table custom-table" id="productTable">
+        <tr>
+            <th title="Product Name">Name</th>
+            <th title="Product Price">Price</th>
+            <th title="Product Category">Category</th>
+        </tr>
+        {% for product in products %}
+        <tr>
+            <td>{{ product.name }}</td>
+            <td>{{ product.price }}</td>
+            <td>{{ product.category }}</td>
+        </tr>
+        {% empty %}
+        <tr>
+            <td colspan="3">No products found.</td>
+        </tr>
+        {% endfor %}
+    </table>
+</div>
+
+<script>
+function filterTables() {
+    const search = document.getElementById('tableSearch').value.toLowerCase();
+    // Filter customer table
+    Array.from(document.querySelectorAll('#customerTable tr')).forEach((row, idx) => {
+        if (idx === 0) return; // skip header
+        row.style.display = row.textContent.toLowerCase().includes(search) ? '' : 'none';
+    });
+    // Filter product table
+    Array.from(document.querySelectorAll('#productTable tr')).forEach((row, idx) => {
+        if (idx === 0) return;
+        row.style.display = row.textContent.toLowerCase().includes(search) ? '' : 'none';
+    });
+}
+</script>
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<!-- Safely pass data to JS -->
+{{ chart_labels|json_script:"labels-data" }}
+{{ chart_data|json_script:"data-data" }}
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    const labels = JSON.parse(document.getElementById('labels-data').textContent);
+    const data = JSON.parse(document.getElementById('data-data').textContent);
+    const ctx = document.getElementById('calcChart').getContext('2d');
+    const calcChart = new Chart(ctx, {
+      type: 'bar',
+      data: {
+        labels: labels,
+        datasets: [{
+          label: 'Calculations per Day',
+          data: data,
+          backgroundColor: 'rgba(54, 162, 235, 0.7)',
+          borderColor: 'rgba(54, 162, 235, 1)',
+          borderWidth: 1
+        }]
+      },
+      options: {
+        scales: {
+          x: { title: { display: true, text: 'Date' } },
+          y: { beginAtZero: true, title: { display: true, text: 'Count' } }
+        }
+      }
+    });
+  });
+</script>
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    console.log('Dashboard JS loaded!');
+  });
+</script>
 {% endblock %}

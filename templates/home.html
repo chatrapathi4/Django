@@ -8,27 +8,184 @@
 <body>
     {% extends 'base.html' %}
     {% block content %}
-    <div class="d-flex justify-content-center align-items-center" style="min-height: 80vh;">
-      <div class="card shadow" style="width: 22rem;">
-        <div class="card-body">
-          <h4 class="card-title text-center mb-4">Simple Calculator</h4>
-          <form action="add" method="post">
-            {% csrf_token %}
-            <div class="mb-3">
-              <label for="num1" class="form-label">Enter First Number:</label>
-              <input type="text" class="form-control" id="num1" name="num1" required>
+    <div class="container mt-4">
+
+  <!-- Compact calculator display: small semi-transparent expression (top), large bold white result (bottom) -->
+  {% if result %}
+  <div class="calc-display d-flex flex-column align-items-end mb-3">
+    <div class="calc-expression">{{ expression }} =</div>
+    <div class="calc-result">{{ result }}</div>
+  </div>
+  {% endif %}
+
+  <!-- Search Bar -->
+  <div class="row justify-content-center mb-4">
+      <div class="col-md-6">
+          <input type="text" id="calculatorSearch" class="form-control" 
+                 placeholder="Search..." onkeyup="searchCalculators()">
+      </div>
+  </div>
+
+  <!-- Calculator Grid -->
+  <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4" id="calculatorGrid">
+    {% for calc in calculators %}
+    <div class="col calculator-card">
+        <div class="card h-100 shadow-sm hover-effect">
+            <div class="card-body text-center">
+                <h1 class="display-4 mb-3">{{ calc.icon }}</h1>
+                <h5 class="card-title">{{ calc.name }}</h5>
+                <p class="card-text text-muted">{{ calc.description }}</p>
+                <a href="{% url 'calculator' calc.id %}" class="btn btn-primary">{{ calc.open }}</a>
             </div>
-            <div class="mb-3">
-              <label for="num2" class="form-label">Enter Second Number:</label>
-              <input type="text" class="form-control" id="num2" name="num2" required>
-            </div>
-            <div class="d-grid">
-              <button type="submit" class="btn btn-primary">Submit</button>
-            </div>
-          </form>
+        </div>
+    </div>
+    {% endfor %}
+
+    <!-- Password Generator Card -->
+    <div class="col calculator-card">
+      <div class="card h-100 shadow-sm hover-effect">
+        <div class="card-body text-center">
+          <h1 class="display-4 mb-3">🔐</h1>
+          <h5 class="card-title">Random Password Generator</h5>
+          <p class="card-text text-muted">Generate secure random passwords</p>
+          <a href="{% url 'password' %}" class="btn btn-primary">Open Generator</a>
         </div>
       </div>
     </div>
+    <!-- End Password Generator Card -->
+
+    <!-- Meme Generator Card -->
+    <div class="col calculator-card">
+      <div class="card h-100 shadow-sm hover-effect">
+        <div class="card-body text-center">
+          <h1 class="display-4 mb-3">😂</h1>
+          <h5 class="card-title">Random Meme Generator</h5>
+          <p class="card-text text-muted">Generate hilarious memes from Reddit</p>
+          <a href="{% url 'meme_generator' %}" class="btn btn-primary">Open Generator</a>
+        </div>
+      </div>
+    </div>
+    <!-- End Meme Generator Card -->
+
+    <!-- Startup Ideas Card -->
+    <div class="col calculator-card">
+      <div class="card h-100 shadow-sm hover-effect">
+        <div class="card-body text-center">
+          <h1 class="display-4 mb-3">💡</h1>
+          <h5 class="card-title">Startup Idea Generator</h5>
+          <p class="card-text text-muted">Discover innovative business ideas</p>
+          <a href="{% url 'startup_ideas' %}" class="btn btn-primary">Open Generator</a>
+        </div>
+      </div>
+    </div>
+    <!-- End Startup Ideas Card -->
+
+    <!-- Webtoon Recommendations Card -->
+    <div class="col calculator-card">
+      <div class="card h-100 shadow-sm hover-effect">
+        <div class="card-body text-center">
+          <h1 class="display-4 mb-3">📚</h1>
+          <h5 class="card-title">Webtoon & Manhwa Finder</h5>
+          <p class="card-text text-muted">Discover amazing webtoons and manhwas</p>
+          <a href="{% url 'webtoon_recommendations' %}" class="btn btn-primary">Open Finder</a>
+        </div>
+      </div>
+    </div>
+    <!-- End Webtoon Recommendations Card -->
+
+    <!-- Movie Recommendations Card -->
+    <div class="col calculator-card">
+      <div class="card h-100 shadow-sm hover-effect">
+        <div class="card-body text-center">
+          <h1 class="display-4 mb-3">🎬</h1>
+          <h5 class="card-title">Movie & TV Show Finder</h5>
+          <p class="card-text text-muted">Discover movies and shows to watch</p>
+          <a href="{% url 'movie_recommendations' %}" class="btn btn-primary">Open Finder</a>
+        </div>
+      </div>
+    </div>
+    <!-- End Movie Recommendations Card -->
+  </div>
+</div>
+
+<style>
+/* Scoped compact display styling */
+.calc-display {
+  width: 100%;
+  max-width: 420px;           /* keep it compact */
+  margin-left: auto;          /* right-align container */
+  line-height: 1;
+}
+
+/* Top line: small, semi-transparent, right aligned */
+.calc-expression {
+  font-size: 0.95rem;
+  font-weight: 400;
+  color: rgba(255,255,255,0.65); /* semi-transparent on dark backgrounds */
+  text-align: right;
+  margin-bottom: 0.15rem;
+  transform: translateY(2px);
+  letter-spacing: 0.2px;
+}
+
+/* Bottom line: large, bold, white, right aligned */
+.calc-result {
+  font-size: 2.15rem;         /* prominent size */
+  font-weight: 800;
+  color: #ffffff;
+  text-align: right;
+  background: transparent;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Make compact on small screens */
+@media (max-width: 576px) {
+  .calc-display { max-width: 320px; }
+  .calc-result { font-size: 1.6rem; }
+  .calc-expression { font-size: 0.85rem; }
+}
+
+.hover-effect {
+    transition: transform 0.2s ease-in-out;
+}
+.hover-effect:hover {
+    transform: translateY(-5px);
+}
+.calculator-card {
+    display: block;
+}
+.calculator-card.hidden {
+    display: none;
+}
+
+/* If your app toggles theme by adding a class on the <body> */
+.theme-dark .text-muted {
+  color: rgba(255, 255, 255, 0.85);
+}
+.theme-light .text-muted {
+  color: rgba(0, 0, 0, 0.65);
+}
+
+
+</style>
+
+<script>
+function searchCalculators() {
+    const searchTerm = document.getElementById('calculatorSearch').value.toLowerCase();
+    const cards = document.getElementsByClassName('calculator-card');
+    
+    Array.from(cards).forEach(card => {
+        const title = card.querySelector('.card-title').textContent.toLowerCase();
+        const description = card.querySelector('.card-text').textContent.toLowerCase();
+        
+        if (title.includes(searchTerm) || description.includes(searchTerm)) {
+            card.classList.remove('hidden');
+        } else {
+            card.classList.add('hidden');
+        }
+    });
+}
+</script>
     {% endblock %}
 </body>
 </html>

@@ -1,0 +1,70 @@
+<script>
+/* Shared calculator helpers: append/insert, clear, undo, keyboard/paste guards */
+function insertAtCaret(input, text) {
+  if (!input) return;
+  const start = input.selectionStart || 0;
+  const end = input.selectionEnd || 0;
+  const val = input.value || '';
+  input.value = val.slice(0, start) + text + val.slice(end);
+  const pos = start + text.length;
+  input.setSelectionRange(pos, pos);
+  input.focus();
+}
+
+function appendToExpression(value) {
+  const input = document.getElementById('expression');
+  insertAtCaret(input, value);
+  const out = document.getElementById('result_display');
+  if (out) out.value = '';
+}
+
+function clearExpression() {
+  const input = document.getElementById('expression');
+  if (input) input.value = '';
+  const out = document.getElementById('result_display');
+  if (out) out.value = '';
+  if (input) input.focus();
+}
+
+function undoExpression() {
+  const input = document.getElementById('expression');
+  if (!input) return;
+  const start = input.selectionStart || 0;
+  const end = input.selectionEnd || 0;
+  if (start === end) {
+    if (start === 0) return;
+    input.value = input.value.slice(0, start - 1) + input.value.slice(end);
+    input.setSelectionRange(start - 1, start - 1);
+  } else {
+    input.value = input.value.slice(0, start) + input.value.slice(end);
+    input.setSelectionRange(start, start);
+  }
+  const out = document.getElementById('result_display');
+  if (out) out.value = '';
+  input.focus();
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+  const input = document.getElementById('expression');
+  const out = document.getElementById('result_display');
+
+  if (input) {
+    input.focus();
+    input.addEventListener('keydown', (e) => {
+      const navKeys = ['Backspace','Delete','ArrowLeft','ArrowRight','ArrowUp','ArrowDown','Home','End','Tab'];
+      if (navKeys.includes(e.key)) return;
+      if (e.key === 'Enter') { e.preventDefault(); input.form && input.form.submit(); return; }
+      if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'z') { e.preventDefault(); undoExpression(); return; }
+      if (!/^[0-9+\-*/%.() ]$/.test(e.key)) e.preventDefault();
+    });
+
+    input.addEventListener('paste', (e) => {
+      const text = (e.clipboardData || window.clipboardData).getData('text') || '';
+      if (!/^[0-9+\-*/%.() \r\n\t]+$/.test(text)) e.preventDefault();
+    });
+  }
+
+  const buttons = document.querySelectorAll('.calculator-grid .calc-btn, .calculator-grid .btn-outline-secondary');
+  buttons.forEach(btn => btn.addEventListener('click', () => input && input.focus()));
+});
+</script>

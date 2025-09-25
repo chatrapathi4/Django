@@ -1,0 +1,281 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="d-flex justify-content-center align-items-center" style="min-height: 80vh;">
+  <div class="card shadow" style="max-width: 980px; width:100%;">
+    <div class="card-body p-3">
+      <div class="d-flex justify-content-between align-items-center mb-2">
+        <h5 class="mb-0">{{ title|default:"Scientific Calculator" }}</h5>
+        <div class="form-check form-check-inline">
+          <input class="form-check-input" type="radio" name="angleMode" id="degMode" value="deg" checked>
+          <label class="form-check-label" for="degMode">Deg</label>
+        </div>
+        <div class="form-check form-check-inline">
+          <input class="form-check-input" type="radio" name="angleMode" id="radMode" value="rad">
+          <label class="form-check-label" for="radMode">Rad</label>
+        </div>
+      </div>
+
+      <form id="sciForm" action="{% url 'calculate' %}" method="post" class="mb-0">
+        {% csrf_token %}
+        <input type="hidden" name="calc_type" value="scientific">
+        <input type="hidden" name="from_client" value="1">
+        <input type="hidden" name="client_result" id="client_result">
+        <input type="hidden" name="client_expression" id="client_expression">
+        <div class="mb-2">
+          <input type="text" id="expression" name="expression" class="form-control form-control-lg text-end"
+                 placeholder="0" value="{{ expression|default:'' }}" autocomplete="off" autofocus>
+        </div>
+        <div class="mb-3">
+          <input type="text" id="result_display" placeholder="Ans=" class="form-control form-control-lg text-end" readonly value="{{ result|default:'' }}">
+        </div>
+
+        <div class="sci-grid mb-2">
+          <!-- Row 1 -->
+          <button type="button" class="btn btn-outline-secondary calc-btn" onclick="memoryMR()">MR</button>
+          <button type="button" class="btn btn-outline-secondary calc-btn" onclick="memoryPlus()">M+</button>
+          <button type="button" class="btn btn-outline-secondary calc-btn" onclick="memoryMinus()">M-</button>
+          <button type="button" class="btn btn-warning calc-btn" onclick="undoExpression()">⌫</button>
+          <button type="button" class="btn btn-danger calc-btn" onclick="clearAll()">AC</button>
+
+          <!-- Row 2 -->
+          <button type="button" class="btn btn-light calc-btn" onclick="appendToExpression('(')">(</button>
+          <button type="button" class="btn btn-light calc-btn" onclick="appendToExpression(')')">)</button>
+          <button type="button" class="btn btn-light calc-btn" onclick="appendToExpression('π')">π</button>
+          <button type="button" class="btn btn-light calc-btn" onclick="appendToExpression('e')">e</button>
+          <button type="button" class="btn btn-secondary calc-btn" onclick="toggleSign()">+/-</button>
+
+          <!-- Row 3 -->
+          <button type="button" class="btn btn-outline-primary calc-btn" onclick="applyFunc('sin')">sin</button>
+          <button type="button" class="btn btn-outline-primary calc-btn" onclick="applyFunc('cos')">cos</button>
+          <button type="button" class="btn btn-outline-primary calc-btn" onclick="applyFunc('tan')">tan</button>
+          <button type="button" class="btn btn-outline-primary calc-btn" onclick="applyFunc('asin')">sin⁻¹</button>
+          <button type="button" class="btn btn-outline-primary calc-btn" onclick="applyFunc('acos')">cos⁻¹</button>
+
+          <!-- Row 4 -->
+          <button type="button" class="btn btn-outline-primary calc-btn" onclick="applyFunc('atan')">tan⁻¹</button>
+          <button type="button" class="btn btn-light calc-btn" onclick="appendToExpression('^')">^</button>
+          <button type="button" class="btn btn-light calc-btn" onclick="appendToExpression('√(')">√</button>
+          <button type="button" class="btn btn-light calc-btn" onclick="appendToExpression('%')">%</button>
+          <button type="button" class="btn btn-info calc-btn" onclick="appendToExpression('!')">!</button>
+
+          <!-- Row 5 -->
+          <button type="button" class="btn btn-light calc-btn" onclick="appendToExpression('7')">7</button>
+          <button type="button" class="btn btn-light calc-btn" onclick="appendToExpression('8')">8</button>
+          <button type="button" class="btn btn-light calc-btn" onclick="appendToExpression('9')">9</button>
+          <button type="button" class="btn btn-info calc-btn" onclick="appendToExpression('/')">÷</button>
+          <button type="button" class="btn btn-secondary calc-btn" onclick="appendAns()">Ans</button>
+
+          <!-- Row 6 -->
+          <button type="button" class="btn btn-light calc-btn" onclick="appendToExpression('4')">4</button>
+          <button type="button" class="btn btn-light calc-btn" onclick="appendToExpression('5')">5</button>
+          <button type="button" class="btn btn-light calc-btn" onclick="appendToExpression('6')">6</button>
+          <button type="button" class="btn btn-info calc-btn" onclick="appendToExpression('*')">×</button>
+          <button type="button" class="btn btn-secondary calc-btn" onclick="randomNumber()">RND</button>
+
+          <!-- Row 7 -->
+          <button type="button" class="btn btn-light calc-btn" onclick="appendToExpression('1')">1</button>
+          <button type="button" class="btn btn-light calc-btn" onclick="appendToExpression('2')">2</button>
+          <button type="button" class="btn btn-light calc-btn" onclick="appendToExpression('3')">3</button>
+          <button type="button" class="btn btn-info calc-btn" onclick="appendToExpression('-')">−</button>
+          <button type="button" class="btn btn-light calc-btn" onclick="appendToExpression('EXP')">EXP</button>
+
+          <!-- Row 8 -->
+          <button type="button" class="btn btn-light calc-btn" onclick="appendToExpression('0')">0</button>
+          <button type="button" class="btn btn-light calc-btn" onclick="appendToExpression('.')">.</button>
+          <button type="button" class="btn btn-light calc-btn" onclick="appendToExpression('e+')">e+</button>
+          <button type="button" class="btn btn-info calc-btn" onclick="appendToExpression('+')">+</button>
+          <button type="submit" class="btn btn-success calc-equals" onclick="return evaluateAndSubmit(event)">=</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<style>
+.sci-grid {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 8px;
+}
+.calc-btn {
+  height: 48px;
+  font-size: 0.95rem;
+  transition: transform .08s ease, box-shadow .08s ease;
+}
+.calc-btn:hover { transform: translateY(-3px); box-shadow: 0 6px 18px rgba(0,0,0,0.08); }
+.calc-equals { height:48px; font-size:1.05rem; }
+@media (max-width: 720px) {
+  .sci-grid { grid-template-columns: repeat(4, 1fr); }
+}
+</style>
+
+{% include 'calculators/_shared_js.html' %}
+
+<script>
+/* Scientific calculator client-side evaluator and helpers */
+(function(){
+  const M = { value: 0 }; // memory storage
+  let Ans = "{{ result|default:'' }}"; // seeded with server result if present
+
+  function toNumberSafe(x){ const n = Number(x); return isNaN(n)? 0 : n; }
+  window.memoryPlus = () => { const r = parseFloat(document.getElementById('result_display').value || Ans || 0); M.value += toNumberSafe(r); };
+  window.memoryMinus = () => { const r = parseFloat(document.getElementById('result_display').value || Ans || 0); M.value -= toNumberSafe(r); };
+  window.memoryMR = () => { appendToExpression(String(M.value)); };
+
+  window.appendAns = window.appendAns || function(){ appendToExpression(String(Ans)); };
+  window.appendAns = appendAns;
+
+  window.randomNumber = function(){ appendToExpression(String(Math.random())); };
+
+  window.applyFunc = function(name){
+    // insert function call at caret
+    if(name === '√'){
+      appendToExpression('√(');
+      return;
+    }
+    appendToExpression(name + '(');
+  };
+
+  window.toggleSign = function(){
+    const el = document.getElementById('expression');
+    if(!el) return;
+    const v = el.value;
+    if(!v) return;
+    // naive toggle on last number
+    el.value = v.replace(/([0-9.]+)$/, function(m){ return (m.startsWith('-')? m.slice(1): '-' + m); });
+  };
+
+  window.clearAll = function(){
+    document.getElementById('expression').value = '';
+    document.getElementById('result_display').value = '';
+  };
+
+  window.undoExpression = function(){
+    const el = document.getElementById('expression');
+    if(!el) return;
+    const start = el.selectionStart || el.value.length;
+    const end = el.selectionEnd || start;
+    if(start === end){
+      el.value = el.value.slice(0, start - 1) + el.value.slice(end);
+      el.setSelectionRange(start - 1, start - 1);
+    } else {
+      el.value = el.value.slice(0, start) + el.value.slice(end);
+      el.setSelectionRange(start, start);
+    }
+  };
+
+  function factorial(n){
+    if(n < 0) return NaN;
+    if(n === 0 || n === 1) return 1;
+    let res = 1;
+    for(let i=2;i<=Math.floor(n);i++) res *= i;
+    return res;
+  }
+
+  function evalExpression(expr){
+    if(!expr) return "";
+    // normalize symbols
+    expr = expr.replace(/×/g, '*').replace(/÷/g, '/').replace(/−/g, '-').replace(/ /g,'')
+    // handle percentage following a number or expression: convert 'x%' to '(x/100)'
+    expr = expr.replace(/([0-9.]+)%/g, '($1/100)')
+
+    // map ^ to **
+    expr = expr.replace(/\^/g, '**')
+
+    // handle EXP (scientific notation) inserted as 'EXP' -> 'e' marker: user flow: '1EXP3' -> '1e3'
+    expr = expr.replace(/EXP/g, 'e')
+
+    // replace π and e constants
+    expr = expr.replace(/π/g, 'Math.PI').replace(/\be\b/g, 'Math.E')
+
+    // handle unary factorial '!'
+    // replace n! with factorial(n)
+    expr = expr.replace(/([0-9.]+|\))!/g, function(m){
+      const inner = m.slice(0, -1);
+      return `factorial(${inner})`;
+    });
+
+    // replace √(x) or √x with Math.sqrt(x)
+    expr = expr.replace(/√\(/g, 'Math.sqrt(').replace(/√([0-9.]+)/g, 'Math.sqrt($1)');
+
+    // functions mapping
+    const angleMode = document.getElementById('degMode').checked ? 'deg' : 'rad';
+    function wrapAngle(fnName){
+      if(angleMode === 'deg'){
+        return function(arg){ return `Math.${fnName}(${arg}*Math.PI/180)`; };
+      } else {
+        return function(arg){ return `Math.${fnName}(${arg})`; };
+      }
+    }
+
+    // Replace trig and inverse trig and math functions
+    expr = expr.replace(/\bsin\(/g, (m)=> angleMode==='deg' ? 'Math.sin(' : 'Math.sin(');
+    expr = expr.replace(/\bcos\(/g, (m)=> angleMode==='deg' ? 'Math.cos(' : 'Math.cos(');
+    expr = expr.replace(/\btan\(/g, (m)=> angleMode==='deg' ? 'Math.tan(' : 'Math.tan(');
+    // inverse functions: use Math.asin etc., convert result to degrees if needed
+    if(angleMode === 'deg'){
+      expr = expr.replace(/\basin\(/g, '((x)=> (Math.asin(x)*180/Math.PI))(');
+      expr = expr.replace(/\bacos\(/g, '((x)=> (Math.acos(x)*180/Math.PI))(');
+      expr = expr.replace(/\batan\(/g, '((x)=> (Math.atan(x)*180/Math.PI))(');
+    } else {
+      expr = expr.replace(/\basin\(/g, 'Math.asin(');
+      expr = expr.replace(/\bacos\(/g, 'Math.acos(');
+      expr = expr.replace(/\batan\(/g, 'Math.atan(');
+    }
+
+    expr = expr.replace(/\bsqrt\(/g, 'Math.sqrt(');
+    expr = expr.replace(/\bln\(/g, 'Math.log('); // natural log
+    expr = expr.replace(/\blog\(/g, (typeof Math.log10 === "function") ? 'Math.log10(' : '(function(x){ return Math.log(x)/Math.LN10; })(');
+
+    // safe evaluation using Function with local helpers
+    const funcBody = `
+      const factorial = ${factorial.toString()};
+      return (${expr});
+    `;
+    try{
+      // eslint-disable-next-line no-new-func
+      const val = new Function(funcBody)();
+      return val;
+    }catch(e){
+      return NaN;
+    }
+  }
+
+  window.evaluateAndSubmit = function(ev){
+    ev && ev.preventDefault();
+    const exprEl = document.getElementById('expression');
+    const outEl = document.getElementById('result_display');
+    let expr = exprEl.value || '';
+    const val = evalExpression(expr);
+    if(val === undefined || Number.isNaN(val)){
+      outEl.value = 'Error';
+      return false;
+    }
+    // format small floats
+    const formatted = (Math.abs(val) < 1e12) ? (Math.round((val + Number.EPSILON) * 1e12) / 1e12).toString() : val.toString();
+    outEl.value = formatted;
+    Ans = formatted;
+    // put values into hidden fields and submit to server to record history
+    document.getElementById('client_result').value = formatted;
+    document.getElementById('client_expression').value = expr;
+    // submit the form to save history
+    document.getElementById('sciForm').submit();
+    return false;
+  };
+
+  // expose some helpers to global scope for buttons (they rely on _shared_js helpers)
+  window.appendToExpression = window.appendToExpression || function(v){
+    const el = document.getElementById('expression');
+    if(!el) return;
+    const start = el.selectionStart || el.value.length;
+    const end = el.selectionEnd || start;
+    const val = el.value;
+    el.value = val.slice(0, start) + v + val.slice(end);
+    const pos = start + v.length;
+    el.setSelectionRange(pos, pos);
+    el.focus();
+  };
+
+})();
+</script>
+{% endblock %}

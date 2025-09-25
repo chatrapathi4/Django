@@ -1,0 +1,30 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="d-flex justify-content-center align-items-center" style="min-height: 80vh;">
+  <div class="card shadow" style="width: 22rem;">
+    <div class="card-body">
+      <h4 class="card-title text-center mb-4">{{ title|default:"Age Calculator" }}</h4>
+
+      <form action="{% url 'calculate' %}" method="post">
+        {% csrf_token %}
+        <input type="hidden" name="calc_type" value="age">
+
+        <div class="mb-3">
+          <label class="form-label">Birthdate</label>
+          <input type="date" name="birthdate" id="birthdate" class="form-control" value="{{ request.POST.birthdate|default:'' }}" required>
+        </div>
+
+        <div class="mb-3">
+          <input type="text" id="result_display" placeholder="Ans=" class="form-control form-control-lg text-end mb-2" readonly value="{{ result|default:'' }}">
+        </div>
+
+        <div class="d-grid gap-2">
+          <button type="submit" class="btn btn-success">Calculate Age</button>
+          <a href="{% url 'home' %}" class="btn btn-secondary">Back</a>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+{% include 'calculators/_shared_js.html' %}
+{% endblock %}

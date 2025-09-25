@@ -1,0 +1,1038 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="container-fluid px-3 py-4">
+  <div class="row justify-content-center">
+    <div class="col-12 col-lg-10 col-xl-8">
+      
+      <!-- Header Section -->
+      <div class="text-center mb-4">
+        <h2 class="display-5 fw-bold text-gradient mb-2">💡 Startup Idea Generator</h2>
+        <p class="text-muted fs-5">Discover innovative business ideas tailored to your interests and market trends</p>
+      </div>
+
+      <!-- Main Content Card -->
+      <div class="card shadow-lg border-0 main-card">
+        <div class="card-body p-4">
+          
+          <!-- Idea Display Area -->
+          <div class="row mb-4">
+            <div class="col-12">
+              <div id="ideaContainer" class="idea-display position-relative">
+                <div id="loadingText" class="loading-content">
+                  <div class="lightbulb-animation">
+                    💡
+                  </div>
+                  <h5 class="loading-title">Ready to Innovate!</h5>
+                  <p class="loading-subtitle">Configure your preferences and generate your next big idea</p>
+                </div>
+                <div id="ideaContent" class="idea-content" style="display: none;">
+                  <div class="idea-header">
+                    <h3 id="ideaTitle" class="idea-title"></h3>
+                    <div class="idea-tags">
+                      <span id="categoryTag" class="badge category-badge"></span>
+                      <span id="difficultyTag" class="badge difficulty-badge"></span>
+                      <span id="marketTag" class="badge market-badge"></span>
+                    </div>
+                  </div>
+                  <div class="idea-body">
+                    <p id="ideaDescription" class="idea-description"></p>
+                    <div class="idea-details">
+                      <div class="row">
+                        <div class="col-md-6">
+                          <h6><i class="fas fa-target me-2"></i>Target Audience</h6>
+                          <p id="targetAudience" class="detail-text"></p>
+                        </div>
+                        <div class="col-md-6">
+                          <h6><i class="fas fa-dollar-sign me-2"></i>Revenue Model</h6>
+                          <p id="revenueModel" class="detail-text"></p>
+                        </div>
+                      </div>
+                      <div class="row">
+                        <div class="col-md-6">
+                          <h6><i class="fas fa-chart-line me-2"></i>Market Size</h6>
+                          <p id="marketSize" class="detail-text"></p>
+                        </div>
+                        <div class="col-md-6">
+                          <h6><i class="fas fa-clock me-2"></i>Time to MVP</h6>
+                          <p id="timeToMvp" class="detail-text"></p>
+                        </div>
+                      </div>
+                    </div>
+                    <div class="idea-features">
+                      <h6><i class="fas fa-star me-2"></i>Key Features</h6>
+                      <ul id="keyFeatures" class="features-list"></ul>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Filters Section -->
+          <div class="row mb-4">
+            <div class="col-md-6 mb-3">
+              <label class="form-label fw-semibold">
+                <i class="fas fa-layer-group me-2"></i>Industry Category
+              </label>
+              <select id="categoryFilter" class="form-select custom-select">
+                <option value="any">🎲 Any Category</option>
+                <option value="tech">💻 Technology</option>
+                <option value="health">🏥 Healthcare</option>
+                <option value="education">📚 Education</option>
+                <option value="finance">💰 Finance</option>
+                <option value="sustainability">🌱 Sustainability</option>
+                <option value="food">🍕 Food & Beverage</option>
+                <option value="ecommerce">🛒 E-commerce</option>
+                <option value="entertainment">🎮 Entertainment</option>
+                <option value="travel">✈️ Travel</option>
+                <option value="social">👥 Social Impact</option>
+              </select>
+            </div>
+            <div class="col-md-6 mb-3">
+              <label class="form-label fw-semibold">
+                <i class="fas fa-chart-bar me-2"></i>Difficulty Level
+              </label>
+              <select id="difficultyFilter" class="form-select custom-select">
+                <option value="any">🎯 Any Difficulty</option>
+                <option value="beginner">🟢 Beginner Friendly</option>
+                <option value="intermediate">🟡 Intermediate</option>
+                <option value="advanced">🔴 Advanced/Expert</option>
+              </select>
+            </div>
+            <div class="col-md-6 mb-3">
+              <label class="form-label fw-semibold">
+                <i class="fas fa-globe me-2"></i>Market Focus
+              </label>
+              <select id="marketFilter" class="form-select custom-select">
+                <option value="any">🌍 Any Market</option>
+                <option value="local">🏘️ Local/Regional</option>
+                <option value="national">🇺🇸 National</option>
+                <option value="global">🌐 Global</option>
+                <option value="niche">🎯 Niche Market</option>
+              </select>
+            </div>
+            <div class="col-md-6 mb-3">
+              <label class="form-label fw-semibold">
+                <i class="fas fa-coins me-2"></i>Budget Range
+              </label>
+              <select id="budgetFilter" class="form-select custom-select">
+                <option value="any">💸 Any Budget</option>
+                <option value="low">💵 Low ($0-$10K)</option>
+                <option value="medium">💰 Medium ($10K-$100K)</option>
+                <option value="high">💎 High ($100K+)</option>
+              </select>
+            </div>
+          </div>
+
+          <!-- Action Buttons -->
+          <div class="row mb-4">
+            <div class="col-12">
+              <div class="button-grid">
+                <!-- Primary Generate Button -->
+                <button type="button" class="btn btn-primary btn-lg generate-btn" onclick="generateIdea()">
+                  <i class="fas fa-lightbulb me-2"></i>Generate Startup Idea
+                </button>
+                
+                <!-- Secondary Actions -->
+                <div class="secondary-buttons">
+                  <button type="button" class="btn btn-outline-info action-btn" onclick="saveIdea()" id="saveBtn" disabled>
+                    <i class="fas fa-bookmark me-2"></i>Save Idea
+                  </button>
+                  <button type="button" class="btn btn-outline-success action-btn" onclick="shareIdea()" id="shareBtn" disabled>
+                    <i class="fas fa-share-alt me-2"></i>Share
+                  </button>
+                  <button type="button" class="btn btn-outline-warning action-btn" onclick="refreshIdea()">
+                    <i class="fas fa-sync-alt me-2"></i>Random
+                  </button>
+                  <button type="button" class="btn btn-outline-danger action-btn" onclick="resetFilters()">
+                    <i class="fas fa-undo me-2"></i>Reset Filters
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Stats Display -->
+          <div class="row mb-4">
+            <div class="col-12">
+              <div class="stats-panel">
+                <div class="row text-center">
+                  <div class="col-6 col-md-3">
+                    <div class="stat-item">
+                      <span class="stat-number" id="ideasGenerated">0</span>
+                      <span class="stat-label">Ideas Generated</span>
+                    </div>
+                  </div>
+                  <div class="col-6 col-md-3">
+                    <div class="stat-item">
+                      <span class="stat-number" id="savedIdeas">0</span>
+                      <span class="stat-label">Saved Ideas</span>
+                    </div>
+                  </div>
+                  <div class="col-6 col-md-3">
+                    <div class="stat-item">
+                      <span class="stat-number" id="favoriteCategory">-</span>
+                      <span class="stat-label">Top Category</span>
+                    </div>
+                  </div>
+                  <div class="col-6 col-md-3">
+                    <div class="stat-item">
+                      <button class="btn btn-outline-danger btn-sm" onclick="resetStats()">
+                        <i class="fas fa-trash me-1"></i>Reset Stats
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Footer Navigation -->
+          <div class="row">
+            <div class="col-12 text-center">
+              <a href="{% url 'home' %}" class="btn btn-outline-dark btn-sm back-btn">
+                <i class="fas fa-arrow-left me-2"></i>Back to Home
+              </a>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- Info Cards -->
+      <div class="row mt-4">
+        <div class="col-md-4 mb-3">
+          <div class="card info-card border-0">
+            <div class="card-body text-center">
+              <i class="fas fa-brain text-primary mb-2" style="font-size: 2rem;"></i>
+              <h6 class="card-title">AI-Powered</h6>
+              <small class="text-muted">Ideas generated using market trends and innovation patterns</small>
+            </div>
+          </div>
+        </div>
+        <div class="col-md-4 mb-3">
+          <div class="card info-card border-0">
+            <div class="card-body text-center">
+              <i class="fas fa-filter text-success mb-2" style="font-size: 2rem;"></i>
+              <h6 class="card-title">Customizable</h6>
+              <small class="text-muted">Filter ideas by industry, difficulty, budget, and market focus</small>
+            </div>
+          </div>
+        </div>
+        <div class="col-md-4 mb-3">
+          <div class="card info-card border-0">
+            <div class="card-body text-center">
+              <i class="fas fa-chart-trending-up text-warning mb-2" style="font-size: 2rem;"></i>
+              <h6 class="card-title">Market Ready</h6>
+              <small class="text-muted">Each idea includes target audience, revenue model, and features</small>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<style>
+/* Modern Styling for Startup Idea Generator */
+.text-gradient {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.main-card {
+  border-radius: 20px;
+  background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+  overflow: hidden;
+}
+
+.dark-theme .main-card {
+  background: linear-gradient(135deg, #2c3e50 0%, #3498db 100%);
+}
+
+.idea-display {
+  min-height: 400px;
+  border-radius: 15px;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.1);
+  transition: all 0.3s ease;
+  padding: 2rem;
+}
+
+.idea-display:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 12px 40px rgba(0,0,0,0.15);
+}
+
+.loading-content {
+  text-align: center;
+  color: white;
+}
+
+.lightbulb-animation {
+  font-size: 4rem;
+  animation: pulse 2s infinite;
+  margin-bottom: 1rem;
+}
+
+@keyframes pulse {
+  0%, 100% { transform: scale(1); opacity: 1; }
+  50% { transform: scale(1.1); opacity: 0.8; }
+}
+
+.loading-title {
+  font-weight: 600;
+  margin-bottom: 0.5rem;
+  font-size: 1.5rem;
+}
+
+.loading-subtitle {
+  margin-bottom: 0;
+  opacity: 0.9;
+  font-size: 1rem;
+}
+
+.idea-content {
+  width: 100%;
+  color: white;
+  animation: fadeIn 0.5s ease;
+}
+
+.idea-header {
+  text-align: center;
+  margin-bottom: 2rem;
+}
+
+.idea-title {
+  font-size: 2rem;
+  font-weight: 700;
+  margin-bottom: 1rem;
+  color: #ffffff;
+}
+
+.idea-tags {
+  display: flex;
+  justify-content: center;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.category-badge {
+  background: linear-gradient(135deg, #FF6B6B, #FF8E8E);
+}
+
+.difficulty-badge {
+  background: linear-gradient(135deg, #4ECDC4, #44A08D);
+}
+
+.market-badge {
+  background: linear-gradient(135deg, #A8E6CF, #7FCDCD);
+}
+
+.idea-description {
+  font-size: 1.1rem;
+  line-height: 1.6;
+  margin-bottom: 2rem;
+  text-align: center;
+}
+
+.idea-details h6 {
+  color: #FFD93D;
+  font-weight: 600;
+  margin-bottom: 0.5rem;
+}
+
+.detail-text {
+  margin-bottom: 1rem;
+  opacity: 0.95;
+}
+
+.idea-features h6 {
+  color: #FFD93D;
+  font-weight: 600;
+  margin-bottom: 1rem;
+}
+
+.features-list {
+  list-style: none;
+  padding: 0;
+}
+
+.features-list li {
+  padding: 0.3rem 0;
+  position: relative;
+  padding-left: 1.5rem;
+}
+
+.features-list li::before {
+  content: "✨";
+  position: absolute;
+  left: 0;
+}
+
+.custom-select {
+  border-radius: 10px;
+  border: 2px solid transparent;
+  background: white;
+  padding: 0.75rem 1rem;
+  font-weight: 500;
+  transition: all 0.2s ease;
+}
+
+.custom-select:focus {
+  border-color: #667eea;
+  box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.25);
+  background: white;
+}
+
+.dark-theme .custom-select {
+  background: #2c3e50;
+  color: white;
+  border-color: #34495e;
+}
+
+.button-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.generate-btn {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  border: none;
+  border-radius: 12px;
+  padding: 1rem 2rem;
+  font-weight: 600;
+  font-size: 1.1rem;
+  transition: all 0.3s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.generate-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4);
+}
+
+.generate-btn:active {
+  transform: translateY(0);
+}
+
+.secondary-buttons {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: 0.75rem;
+}
+
+.action-btn {
+  border-radius: 10px;
+  padding: 0.75rem 1rem;
+  font-weight: 500;
+  transition: all 0.2s ease;
+  border-width: 2px;
+}
+
+.action-btn:hover {
+  transform: translateY(-1px);
+}
+
+.action-btn:disabled {
+  opacity: 0.5;
+  transform: none;
+}
+
+.stats-panel {
+  background: rgba(255,255,255,0.9);
+  border-radius: 12px;
+  padding: 1.5rem;
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255,255,255,0.2);
+}
+
+.dark-theme .stats-panel {
+  background: rgba(0,0,0,0.3);
+  border: 1px solid rgba(255,255,255,0.1);
+}
+
+.stat-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.stat-number {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #667eea;
+}
+
+.stat-label {
+  font-size: 0.875rem;
+  color: #666;
+  margin-top: 0.25rem;
+}
+
+.dark-theme .stat-label {
+  color: #ccc;
+}
+
+.back-btn {
+  border-radius: 20px;
+  padding: 0.5rem 1.5rem;
+  font-weight: 500;
+  transition: all 0.2s ease;
+}
+
+.info-card {
+  background: rgba(255,255,255,0.8);
+  backdrop-filter: blur(10px);
+  border-radius: 12px;
+  transition: transform 0.2s ease;
+}
+
+.info-card:hover {
+  transform: translateY(-3px);
+}
+
+.dark-theme .info-card {
+  background: rgba(0,0,0,0.2);
+}
+
+/* Success state styling */
+.idea-display.loaded {
+  background: linear-gradient(135deg, #56ab2f 0%, #a8e6cf 100%);
+}
+
+/* Animation for idea loading */
+@keyframes fadeIn {
+  from { opacity: 0; transform: scale(0.95); }
+  to { opacity: 1; transform: scale(1); }
+}
+
+/* Responsive Adjustments */
+@media (max-width: 768px) {
+  .idea-display {
+    min-height: 300px;
+    padding: 1rem;
+  }
+  
+  .idea-title {
+    font-size: 1.5rem;
+  }
+  
+  .secondary-buttons {
+    grid-template-columns: 1fr;
+  }
+  
+  .generate-btn {
+    padding: 0.875rem 1.5rem;
+    font-size: 1rem;
+  }
+}
+
+@media (max-width: 576px) {
+  .idea-tags {
+    justify-content: center;
+  }
+  
+  .badge {
+    font-size: 0.8rem;
+    padding: 0.3rem 0.6rem;
+  }
+  
+  .display-5 {
+    font-size: 1.8rem;
+  }
+}
+</style>
+
+<script>
+/* Startup Idea Generator with comprehensive business ideas */
+(function() {
+  let currentIdea = null;
+  let ideasGenerated = parseInt(localStorage.getItem('ideasGenerated') || '0');
+  let savedIdeas = parseInt(localStorage.getItem('savedIdeas') || '0');
+  let categoryStats = JSON.parse(localStorage.getItem('categoryStats') || '{}');
+
+  // Comprehensive startup ideas database
+  const startupIdeas = [
+    // Technology
+    {
+      category: 'tech',
+      difficulty: 'intermediate',
+      market: 'global',
+      budget: 'medium',
+      title: 'AI-Powered Personal Finance Assistant',
+      description: 'A smart mobile app that analyzes spending patterns, provides personalized financial advice, and automatically categorizes expenses using machine learning.',
+      targetAudience: 'Millennials and Gen-Z seeking better financial management',
+      revenueModel: 'Freemium subscription with premium features',
+      marketSize: '$12B+ Personal Finance Software Market',
+      timeToMvp: '6-8 months',
+      features: ['Expense tracking with AI categorization', 'Personalized savings goals', 'Investment recommendations', 'Bill payment reminders', 'Financial health score']
+    },
+    {
+      category: 'tech',
+      difficulty: 'advanced',
+      market: 'global',
+      budget: 'high',
+      title: 'Blockchain-Based Supply Chain Tracker',
+      description: 'A transparency platform that tracks products from origin to consumer using blockchain technology, ensuring authenticity and ethical sourcing.',
+      targetAudience: 'Manufacturers, retailers, and conscious consumers',
+      revenueModel: 'B2B SaaS licensing and transaction fees',
+      marketSize: '$6B+ Supply Chain Analytics Market',
+      timeToMvp: '12-18 months',
+      features: ['Immutable product tracking', 'QR code verification', 'Sustainability metrics', 'Real-time alerts', 'Compliance reporting']
+    },
+    {
+      category: 'tech',
+      difficulty: 'beginner',
+      market: 'local',
+      budget: 'low',
+      title: 'Smart Parking Finder App',
+      description: 'A mobile app that helps drivers find available parking spots in real-time using crowdsourced data and IoT sensors.',
+      targetAudience: 'Urban drivers and commuters',
+      revenueModel: 'Advertising and partnership fees with parking providers',
+      marketSize: '$7B+ Smart Parking Market',
+      timeToMvp: '3-4 months',
+      features: ['Real-time parking availability', 'Price comparison', 'Reservation system', 'Navigation integration', 'Payment processing']
+    },
+
+    // Healthcare
+    {
+      category: 'health',
+      difficulty: 'advanced',
+      market: 'global',
+      budget: 'high',
+      title: 'Telemedicine Platform for Mental Health',
+      description: 'A comprehensive platform connecting patients with licensed therapists and psychiatrists for remote consultations and ongoing mental health support.',
+      targetAudience: 'Individuals seeking accessible mental healthcare',
+      revenueModel: 'Commission on consultations and subscription plans',
+      marketSize: '$5.6B+ Telehealth Market',
+      timeToMvp: '8-12 months',
+      features: ['Video consultations', 'Secure messaging', 'Appointment scheduling', 'Progress tracking', 'Crisis intervention hotline']
+    },
+    {
+      category: 'health',
+      difficulty: 'intermediate',
+      market: 'national',
+      budget: 'medium',
+      title: 'Medication Adherence Tracker',
+      description: 'A smart pill dispenser with mobile app that reminds patients to take medications and tracks adherence for better health outcomes.',
+      targetAudience: 'Elderly patients and chronic disease sufferers',
+      revenueModel: 'Hardware sales and subscription services',
+      marketSize: '$2B+ Medication Management Market',
+      timeToMvp: '6-9 months',
+      features: ['Smart pill dispensing', 'Medication reminders', 'Adherence reporting', 'Caregiver notifications', 'Pharmacy integration']
+    },
+
+    // Education
+    {
+      category: 'education',
+      difficulty: 'intermediate',
+      market: 'global',
+      budget: 'medium',
+      title: 'VR-Based Skill Training Platform',
+      description: 'An immersive virtual reality platform for professional skill training in fields like healthcare, engineering, and trades.',
+      targetAudience: 'Educational institutions and corporate training departments',
+      revenueModel: 'B2B licensing and content creation services',
+      marketSize: '$12.6B+ VR in Education Market',
+      timeToMvp: '8-10 months',
+      features: ['Immersive VR simulations', 'Progress analytics', 'Multi-user environments', 'Assessment tools', 'Content marketplace']
+    },
+    {
+      category: 'education',
+      difficulty: 'beginner',
+      market: 'local',
+      budget: 'low',
+      title: 'Language Exchange Mobile App',
+      description: 'A platform connecting native speakers for mutual language learning through video calls, text chat, and cultural exchange.',
+      targetAudience: 'Language learners and cultural enthusiasts',
+      revenueModel: 'Premium subscriptions and lesson marketplace',
+      marketSize: '$15.2B+ Language Learning Market',
+      timeToMvp: '4-6 months',
+      features: ['Native speaker matching', 'Video chat integration', 'Learning progress tracking', 'Cultural exchange forums', 'Gamified lessons']
+    },
+
+    // Finance
+    {
+      category: 'finance',
+      difficulty: 'advanced',
+      market: 'global',
+      budget: 'high',
+      title: 'Micro-Investment Platform for Spare Change',
+      description: 'An app that rounds up everyday purchases and invests the spare change in diversified portfolios, making investing accessible to everyone.',
+      targetAudience: 'Young professionals and first-time investors',
+      revenueModel: 'Management fees and premium investment options',
+      marketSize: '$4.5B+ Robo-Advisor Market',
+      timeToMvp: '10-12 months',
+      features: ['Automatic round-ups', 'Diversified portfolios', 'Goal-based investing', 'Financial education', 'Social investing features']
+    },
+    {
+      category: 'finance',
+      difficulty: 'intermediate',
+      market: 'national',
+      budget: 'medium',
+      title: 'Peer-to-Peer Business Lending',
+      description: 'A platform connecting small businesses with individual investors for alternative lending solutions with competitive rates.',
+      targetAudience: 'Small business owners and individual investors',
+      revenueModel: 'Origination fees and servicing charges',
+      marketSize: '$67B+ P2P Lending Market',
+      timeToMvp: '6-8 months',
+      features: ['Credit assessment algorithm', 'Investor dashboard', 'Automated payments', 'Risk analytics', 'Portfolio diversification tools']
+    },
+
+    // Sustainability
+    {
+      category: 'sustainability',
+      difficulty: 'intermediate',
+      market: 'global',
+      budget: 'medium',
+      title: 'Carbon Footprint Tracking App',
+      description: 'A comprehensive app that tracks personal carbon emissions and suggests actionable ways to reduce environmental impact.',
+      targetAudience: 'Environmentally conscious consumers',
+      revenueModel: 'Premium features and carbon offset partnerships',
+      marketSize: '$9.8B+ Carbon Management Software Market',
+      timeToMvp: '5-7 months',
+      features: ['Activity tracking', 'Carbon calculation', 'Reduction recommendations', 'Offset marketplace', 'Community challenges']
+    },
+    {
+      category: 'sustainability',
+      difficulty: 'beginner',
+      market: 'local',
+      budget: 'low',
+      title: 'Community Composting Network',
+      description: 'A platform connecting households with local composting facilities and gardens to reduce food waste and promote sustainable practices.',
+      targetAudience: 'Eco-conscious households and local gardeners',
+      revenueModel: 'Service fees and compost sales',
+      marketSize: '$2.1B+ Composting Market',
+      timeToMvp: '3-4 months',
+      features: ['Pickup scheduling', 'Composting education', 'Local network mapping', 'Impact tracking', 'Reward system']
+    },
+
+    // Food & Beverage
+    {
+      category: 'food',
+      difficulty: 'intermediate',
+      market: 'national',
+      budget: 'medium',
+      title: 'AI-Powered Meal Planning Service',
+      description: 'A personalized meal planning service that creates custom recipes based on dietary preferences, health goals, and available ingredients.',
+      targetAudience: 'Health-conscious individuals and busy professionals',
+      revenueModel: 'Subscription plans and grocery delivery partnerships',
+      marketSize: '$4.6B+ Meal Kit Delivery Market',
+      timeToMvp: '5-8 months',
+      features: ['AI recipe generation', 'Nutritional analysis', 'Shopping list creation', 'Dietary restriction filters', 'Leftover optimization']
+    },
+    {
+      category: 'food',
+      difficulty: 'beginner',
+      market: 'local',
+      budget: 'low',
+      title: 'Food Waste Reduction Marketplace',
+      description: 'A platform connecting restaurants and grocery stores with consumers to sell surplus food at discounted prices, reducing waste.',
+      targetAudience: 'Budget-conscious consumers and food businesses',
+      revenueModel: 'Commission on transactions',
+      marketSize: '$1.5B+ Food Waste Management Market',
+      timeToMvp: '3-5 months',
+      features: ['Real-time inventory listing', 'Location-based search', 'Payment processing', 'Impact tracking', 'Business analytics']
+    },
+
+    // E-commerce
+    {
+      category: 'ecommerce',
+      difficulty: 'intermediate',
+      market: 'global',
+      budget: 'medium',
+      title: 'Virtual Try-On Shopping Platform',
+      description: 'An AR-powered e-commerce platform that allows customers to virtually try on clothes, accessories, and makeup before purchasing.',
+      targetAudience: 'Online fashion and beauty shoppers',
+      revenueModel: 'Commission on sales and SaaS licensing to retailers',
+      marketSize: '$6.5B+ AR in Retail Market',
+      timeToMvp: '8-12 months',
+      features: ['AR try-on technology', 'Size recommendation engine', 'Social sharing', 'Multi-brand integration', 'Mobile optimization']
+    },
+
+    // Entertainment
+    {
+      category: 'entertainment',
+      difficulty: 'advanced',
+      market: 'global',
+      budget: 'high',
+      title: 'Interactive Streaming Platform',
+      description: 'A next-generation streaming service where viewers can influence storylines and character decisions in real-time interactive content.',
+      targetAudience: 'Gen-Z and millennial entertainment consumers',
+      revenueModel: 'Subscription fees and interactive content premium access',
+      marketSize: '$184B+ Streaming Market',
+      timeToMvp: '12-18 months',
+      features: ['Interactive storytelling', 'Real-time polling', 'Multi-path narratives', 'Social viewing features', 'Creator tools']
+    },
+
+    // Travel
+    {
+      category: 'travel',
+      difficulty: 'intermediate',
+      market: 'global',
+      budget: 'medium',
+      title: 'Sustainable Tourism Platform',
+      description: 'A travel booking platform focused on eco-friendly accommodations, carbon-neutral transportation, and sustainable local experiences.',
+      targetAudience: 'Environmentally conscious travelers',
+      revenueModel: 'Booking commissions and sustainability certification fees',
+      marketSize: '$15.6B+ Sustainable Tourism Market',
+      timeToMvp: '6-9 months',
+      features: ['Sustainability ratings', 'Carbon offset calculator', 'Local experience marketplace', 'Eco-friendly filters', 'Impact tracking']
+    },
+
+    // Social Impact
+    {
+      category: 'social',
+      difficulty: 'beginner',
+      market: 'local',
+      budget: 'low',
+      title: 'Community Skill Sharing Network',
+      description: 'A hyperlocal platform where community members can share skills, teach each other, and build stronger neighborhood connections.',
+      targetAudience: 'Local community members and skill enthusiasts',
+      revenueModel: 'Platform fees and premium community features',
+      marketSize: '$3.2B+ Skill-Based Learning Market',
+      timeToMvp: '4-6 months',
+      features: ['Skill matching algorithm', 'Local event coordination', 'Peer rating system', 'Time banking', 'Community forums']
+    }
+  ];
+
+  function updateStats() {
+    document.getElementById('ideasGenerated').textContent = ideasGenerated;
+    document.getElementById('savedIdeas').textContent = savedIdeas;
+    
+    // Find most popular category
+    const topCategory = Object.keys(categoryStats).reduce((a, b) => 
+      categoryStats[a] > categoryStats[b] ? a : b, 'None'
+    );
+    document.getElementById('favoriteCategory').textContent = topCategory || '-';
+    
+    // Save to localStorage
+    localStorage.setItem('ideasGenerated', ideasGenerated.toString());
+    localStorage.setItem('savedIdeas', savedIdeas.toString());
+    localStorage.setItem('categoryStats', JSON.stringify(categoryStats));
+  }
+
+  function showLoading(show = true, message = 'Generating innovative idea...') {
+    const loading = document.getElementById('loadingText');
+    const content = document.getElementById('ideaContent');
+    const container = document.getElementById('ideaContainer');
+    
+    if (show) {
+      loading.style.display = 'block';
+      content.style.display = 'none';
+      container.className = 'idea-display position-relative';
+      loading.innerHTML = `
+        <div class="lightbulb-animation">💡</div>
+        <h5 class="loading-title">${message}</h5>
+        <p class="loading-subtitle">Analyzing market trends and opportunities...</p>
+      `;
+    } else {
+      loading.style.display = 'none';
+      content.style.display = 'block';
+      container.classList.add('loaded');
+    }
+  }
+
+  function getFilteredIdeas() {
+    const category = document.getElementById('categoryFilter').value;
+    const difficulty = document.getElementById('difficultyFilter').value;
+    const market = document.getElementById('marketFilter').value;
+    const budget = document.getElementById('budgetFilter').value;
+
+    return startupIdeas.filter(idea => {
+      return (category === 'any' || idea.category === category) &&
+             (difficulty === 'any' || idea.difficulty === difficulty) &&
+             (market === 'any' || idea.market === market) &&
+             (budget === 'any' || idea.budget === budget);
+    });
+  }
+
+  function displayIdea(idea) {
+    document.getElementById('ideaTitle').textContent = idea.title;
+    document.getElementById('ideaDescription').textContent = idea.description;
+    document.getElementById('targetAudience').textContent = idea.targetAudience;
+    document.getElementById('revenueModel').textContent = idea.revenueModel;
+    document.getElementById('marketSize').textContent = idea.marketSize;
+    document.getElementById('timeToMvp').textContent = idea.timeToMvp;
+    
+    // Update tags
+    document.getElementById('categoryTag').textContent = idea.category.toUpperCase();
+    document.getElementById('difficultyTag').textContent = idea.difficulty.toUpperCase();
+    document.getElementById('marketTag').textContent = idea.market.toUpperCase();
+    
+    // Update features
+    const featuresList = document.getElementById('keyFeatures');
+    featuresList.innerHTML = '';
+    idea.features.forEach(feature => {
+      const li = document.createElement('li');
+      li.textContent = feature;
+      featuresList.appendChild(li);
+    });
+    
+    // Enable buttons
+    document.getElementById('saveBtn').disabled = false;
+    document.getElementById('shareBtn').disabled = false;
+  }
+
+  window.generateIdea = function() {
+    showLoading(true);
+    
+    setTimeout(() => {
+      const filteredIdeas = getFilteredIdeas();
+      
+      if (filteredIdeas.length === 0) {
+        showLoading(false);
+        document.getElementById('loadingText').innerHTML = `
+          <div class="text-center">
+            <h5 class="loading-title">No Ideas Found</h5>
+            <p class="loading-subtitle">Try adjusting your filters to see more options</p>
+            <button class="btn btn-outline-light btn-sm mt-2" onclick="resetFilters()">
+              Reset Filters
+            </button>
+          </div>
+        `;
+        return;
+      }
+      
+      const randomIdea = filteredIdeas[Math.floor(Math.random() * filteredIdeas.length)];
+      currentIdea = randomIdea;
+      
+      // Update stats
+      ideasGenerated++;
+      categoryStats[randomIdea.category] = (categoryStats[randomIdea.category] || 0) + 1;
+      updateStats();
+      
+      showLoading(false);
+      displayIdea(randomIdea);
+    }, 1500);
+  };
+
+  window.refreshIdea = function() {
+    // Reset all filters to 'any'
+    document.getElementById('categoryFilter').value = 'any';
+    document.getElementById('difficultyFilter').value = 'any';
+    document.getElementById('marketFilter').value = 'any';
+    document.getElementById('budgetFilter').value = 'any';
+    generateIdea();
+  };
+
+  window.resetFilters = function() {
+    document.getElementById('categoryFilter').value = 'any';
+    document.getElementById('difficultyFilter').value = 'any';
+    document.getElementById('marketFilter').value = 'any';
+    document.getElementById('budgetFilter').value = 'any';
+    showNotification('Filters reset successfully!', 'info');
+  };
+
+  window.saveIdea = function() {
+    if (!currentIdea) {
+      showNotification('No idea to save! Generate one first.', 'warning');
+      return;
+    }
+
+    const savedIdeasList = JSON.parse(localStorage.getItem('savedIdeasList') || '[]');
+    
+    // Check if already saved
+    if (savedIdeasList.some(idea => idea.title === currentIdea.title)) {
+      showNotification('This idea is already saved!', 'info');
+      return;
+    }
+
+    savedIdeasList.push({
+      ...currentIdea,
+      savedAt: new Date().toISOString()
+    });
+    
+    localStorage.setItem('savedIdeasList', JSON.stringify(savedIdeasList));
+    savedIdeas++;
+    updateStats();
+    
+    showNotification('Idea saved successfully!', 'success');
+  };
+
+  window.shareIdea = function() {
+    if (!currentIdea) {
+      showNotification('No idea to share! Generate one first.', 'warning');
+      return;
+    }
+
+    const shareText = `💡 Startup Idea: ${currentIdea.title}\n\n${currentIdea.description}\n\nTarget: ${currentIdea.targetAudience}\nMarket: ${currentIdea.marketSize}`;
+
+    if (navigator.share) {
+      navigator.share({
+        title: currentIdea.title,
+        text: shareText,
+        url: window.location.href
+      });
+    } else {
+      navigator.clipboard.writeText(shareText).then(() => {
+        showNotification('Idea copied to clipboard!', 'success');
+      });
+    }
+  };
+
+  window.resetStats = function() {
+    if (confirm('Are you sure you want to reset all statistics? This action cannot be undone.')) {
+      ideasGenerated = 0;
+      savedIdeas = 0;
+      categoryStats = {};
+      localStorage.removeItem('savedIdeasList');
+      updateStats();
+      showNotification('Statistics reset successfully!', 'success');
+    }
+  };
+
+  function showNotification(message, type = 'info') {
+    const notification = document.createElement('div');
+    notification.className = `alert alert-${type === 'error' ? 'danger' : type} notification`;
+    notification.textContent = message;
+    notification.style.cssText = `
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      z-index: 9999;
+      animation: slideIn 0.3s ease;
+      max-width: 300px;
+    `;
+    
+    document.body.appendChild(notification);
+    setTimeout(() => {
+      notification.style.animation = 'slideOut 0.3s ease';
+      setTimeout(() => notification.remove(), 300);
+    }, 3000);
+  }
+
+  // Initialize
+  document.addEventListener('DOMContentLoaded', function() {
+    updateStats();
+  });
+
+  // Add CSS for notifications
+  const style = document.createElement('style');
+  style.textContent = `
+    @keyframes slideIn {
+      from { transform: translateX(100%); opacity: 0; }
+      to { transform: translateX(0); opacity: 1; }
+    }
+    @keyframes slideOut {
+      from { transform: translateX(0); opacity: 1; }
+      to { transform: translateX(100%); opacity: 0; }
+    }
+  `;
+  document.head.appendChild(style);
+
+})();
+</script>
+
+<!-- Font Awesome for icons -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+{% endblock %}

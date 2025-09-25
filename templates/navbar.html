@@ -47,6 +47,114 @@
     .navbar-toggler {
       border: none;
     }
+
+    /* Theme Switch styling */
+    .theme-switch-wrapper {
+      display: flex;
+      align-items: center;
+      margin-left: 1rem;
+    }
+
+    .theme-switch {
+      display: inline-block;
+      height: 40px;          /* Increased from 34px */
+      position: relative;
+      width: 80px;           /* Increased from 60px */
+    }
+
+    .theme-switch input {
+      display: none;
+    }
+
+    .slider {
+      background-color: #ccc;
+      bottom: 0;
+      cursor: pointer;
+      left: 0;
+      position: absolute;
+      right: 0;
+      top: 0;
+      transition: .4s;
+    }
+    .slider:before {
+      background-color: #fff;
+      bottom: 4px;
+      content: "";
+      height: 32px;          /* Increased from 26px */
+      left: 4px;
+      position: absolute;
+      transition: .4s;
+      width: 32px;           /* Increased from 26px */
+    }
+    .slider.round {
+      border-radius: 34px;
+    }
+    .slider.round:before {
+      border-radius: 50%;
+    }
+    input:checked + .slider {
+      background-color: #39b3ac;
+    }
+    input:checked + .slider:before {
+      transform: translateX(40px);  /* Adjusted from 26px - should be width minus padding */
+    }
+    .slider .sun,
+    .slider .moon {
+      position: absolute;
+      top: 50%;
+      transform: translateY(-50%);
+      font-size: 20px;       /* Increased from 16px */
+      transition: opacity 0.3s ease;
+    }
+    .slider .sun {
+      left: 8px;            /* Adjusted from 7px */
+      opacity: 1;
+    }
+    .slider .moon {
+      right: 8px;           /* Adjusted from 7px */
+      opacity: 0;
+    }
+    input:checked + .slider .sun {
+      opacity: 0;
+    }
+    input:checked + .slider .moon {
+      opacity: 1;
+    }
+
+    /* Theme Transitions */
+    body {
+      transition: all 0.3s ease-in-out;
+    }
+
+    .card, .card-body {
+      transition: all 0.3s ease-in-out;
+    }
+
+    .dark-theme {
+      background-color: #222 !important;
+      color: #ffffff !important;
+    }
+
+    .light-theme {
+      background-color: powderblue !important;
+      color: #111 !important;
+    }
+
+    .dark-theme .card,
+    .dark-theme .card-body {
+      background-color: #2d3238 !important;
+      color: #fff !important;
+      border-color: #444 !important;
+      box-shadow: 0 4px 6px rgba(0,0,0,0.3) !important;
+    }
+    .light-theme .card,
+    .light-theme .card-body {
+      background-color: #fff !important;
+      color: #111 !important;
+      border-color: #ddd !important;
+      box-shadow: 0 4px 6px rgba(0,0,0,0.1) !important;
+    }
+
   </style>
 </head>
 <body>
@@ -69,20 +177,29 @@
     <a class="navbar-brand" href="https://github.com/chatrapathi4/Djangoprojects">
       <span style="color: aliceblue;">Django</span>
     </a>
-
-    <!-- Search bar aligned to the right -->
-    <form class="d-flex ms-auto" role="search">
-      <input class="form-control me-2" type="search" placeholder="Search" aria-label="Search">
-      <button class="btn btn-outline-success" type="submit">Search</button>
-    </form>
+    
+    <!-- Light/Dark Theme Toggle Switch aligned to the right -->
+    <div class="ms-auto d-flex align-items-center">
+      <div class="theme-switch-wrapper">
+        <label class="theme-switch" for="checkbox">
+          <input type="checkbox" id="checkbox" />
+          <div class="slider round">
+            <span class="sun">🌞</span>
+            <span class="moon">🌙</span>
+          </div>
+        </label>
+      </div>
+    </div>
   </div>
 </nav>
 
 <!-- Sidebar -->
 <div id="sidebar">
   <a href="javascript:void(0)" onclick="closeSidebar()">❌ Close</a>
-  <a href="{% url 'home' %}">Home</a>
-  <a href="{% url 'dashboard' %}">Dashboard</a>
+  <a href="{% url 'home' %}">🏠 Home</a>
+  <a href="{% url 'ChatGPT' %}">☠️ ChatGPT</a>
+  <a href="{% url 'bootstrap' %}">🫐 Bootstrap</a>
+  <a href="{% url 'dashboard' %}">💨 Dashboard</a>
   <a href="{% url 'settings' %}">⚙️ Settings</a>
 </div>
 

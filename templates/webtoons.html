@@ -1,0 +1,1120 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="container-fluid px-3 py-4">
+  <div class="row justify-content-center">
+    <div class="col-12 col-lg-10 col-xl-8">
+      
+      <!-- Header Section -->
+      <div class="text-center mb-4">
+        <h2 class="display-5 fw-bold text-gradient mb-2">📚 Webtoon & Manhwa Finder</h2>
+        <p class="text-muted fs-5">Discover amazing webtoons and manhwas with real-time recommendations</p>
+      </div>
+
+      <!-- Main Content Card -->
+      <div class="card shadow-lg border-0 main-card">
+        <div class="card-body p-4">
+          
+          <!-- API Source Indicator -->
+          <div class="row mb-3">
+            <div class="col-12">
+              <div class="api-status-bar">
+                <div class="d-flex align-items-center justify-content-between">
+                  <span class="api-status">
+                    <i class="fas fa-wifi me-2"></i>
+                    <span id="apiSource">Ready to fetch live data</span>
+                  </span>
+                  <div class="api-indicators">
+                    <span class="indicator" id="malIndicator" title="MyAnimeList API">
+                      <i class="fas fa-circle"></i> MAL
+                    </span>
+                    <span class="indicator" id="jikanIndicator" title="Jikan API">
+                      <i class="fas fa-circle"></i> Jikan
+                    </span>
+                    <span class="indicator" id="redditIndicator" title="Reddit API">
+                      <i class="fas fa-circle"></i> Reddit
+                    </span>
+                    <span class="indicator active" id="curatedIndicator" title="Curated Database">
+                      <i class="fas fa-circle"></i> Curated
+                    </span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Recommendation Display Area -->
+          <div class="row mb-4">
+            <div class="col-12">
+              <div id="webtoonContainer" class="webtoon-display position-relative">
+                <div id="loadingText" class="loading-content">
+                  <div class="book-animation">
+                    📖
+                  </div>
+                  <h5 class="loading-title">Ready to Discover!</h5>
+                  <p class="loading-subtitle">Set your preferences and find your next favorite read from live sources</p>
+                </div>
+                <div id="webtoonContent" class="webtoon-content" style="display: none;">
+                  <div class="row">
+                    <div class="col-md-4 mb-3">
+                      <div class="webtoon-cover">
+                        <div id="coverImage" class="cover-placeholder">
+                          <img id="coverImageSrc" class="cover-image" style="display: none;" alt="Cover">
+                          <i class="fas fa-book-open cover-icon"></i>
+                        </div>
+                        <div class="rating-display">
+                          <span id="ratingStars" class="stars"></span>
+                          <span id="ratingScore" class="rating-text">0.0</span>
+                        </div>
+                      </div>
+                    </div>
+                    <div class="col-md-8">
+                      <div class="webtoon-info">
+                        <div class="webtoon-header">
+                          <h3 id="webtoonTitle" class="webtoon-title"></h3>
+                          <div class="webtoon-badges">
+                            <span id="typeTag" class="badge type-badge"></span>
+                            <span id="statusTag" class="badge status-badge"></span>
+                            <span id="genreTag" class="badge genre-badge"></span>
+                            <span id="sourceTag" class="badge source-badge"></span>
+                          </div>
+                        </div>
+                        <div class="webtoon-details">
+                          <p id="webtoonDescription" class="description-text"></p>
+                          <div class="meta-info">
+                            <div class="row">
+                              <div class="col-sm-6">
+                                <small><i class="fas fa-user me-1"></i><strong>Author:</strong> <span id="authorName"></span></small>
+                              </div>
+                              <div class="col-sm-6">
+                                <small><i class="fas fa-calendar me-1"></i><strong>Year:</strong> <span id="releaseYear"></span></small>
+                              </div>
+                              <div class="col-sm-6">
+                                <small><i class="fas fa-list-ol me-1"></i><strong>Chapters:</strong> <span id="chapterCount"></span></small>
+                              </div>
+                              <div class="col-sm-6">
+                                <small><i class="fas fa-globe me-1"></i><strong>Origin:</strong> <span id="originCountry"></span></small>
+                              </div>
+                            </div>
+                          </div>
+                          <div class="tags-display" id="tagsDisplay" style="display: none;">
+                            <h6><i class="fas fa-tags me-2"></i>Tags</h6>
+                            <div id="tagsList" class="tags-container"></div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="row mt-3">
+                    <div class="col-12">
+                      <div class="action-buttons-inline">
+                        <button class="btn btn-outline-primary btn-sm" onclick="addToWishlist()">
+                          <i class="fas fa-heart me-1"></i>Add to Wishlist
+                        </button>
+                        <button class="btn btn-outline-success btn-sm" onclick="markAsRead()">
+                          <i class="fas fa-check me-1"></i>Mark as Read
+                        </button>
+                        <button class="btn btn-outline-info btn-sm" onclick="shareWebtoon()">
+                          <i class="fas fa-share me-1"></i>Share
+                        </button>
+                        <button class="btn btn-outline-warning btn-sm" onclick="openExternal()" id="externalBtn" style="display: none;">
+                          <i class="fas fa-external-link-alt me-1"></i>View Online
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Filters Section -->
+          <div class="row mb-4">
+            <div class="col-md-6 mb-3">
+              <label class="form-label fw-semibold">
+                <i class="fas fa-tags me-2"></i>Genre Preference
+              </label>
+              <select id="genreFilter" class="form-select custom-select">
+                <option value="any">🎯 Any Genre</option>
+                <option value="action">⚔️ Action</option>
+                <option value="romance">💕 Romance</option>
+                <option value="comedy">😂 Comedy</option>
+                <option value="drama">🎭 Drama</option>
+                <option value="fantasy">🧙‍♂️ Fantasy</option>
+                <option value="horror">👻 Horror</option>
+                <option value="mystery">🔍 Mystery</option>
+                <option value="slice-of-life">🌸 Slice of Life</option>
+                <option value="supernatural">👻 Supernatural</option>
+                <option value="sci-fi">🚀 Sci-Fi</option>
+                <option value="thriller">😱 Thriller</option>
+                <option value="historical">🏛️ Historical</option>
+              </select>
+            </div>
+            <div class="col-md-6 mb-3">
+              <label class="form-label fw-semibold">
+                <i class="fas fa-globe me-2"></i>Content Type
+              </label>
+              <select id="typeFilter" class="form-select custom-select">
+                <option value="any">📚 Any Type</option>
+                <option value="webtoon">🇰🇷 Webtoon (Korean)</option>
+                <option value="manhwa">📖 Manhwa (Korean)</option>
+                <option value="manhua">🇨🇳 Manhua (Chinese)</option>
+                <option value="manga">🇯🇵 Manga (Japanese)</option>
+              </select>
+            </div>
+            <div class="col-md-6 mb-3">
+              <label class="form-label fw-semibold">
+                <i class="fas fa-signal me-2"></i>Status
+              </label>
+              <select id="statusFilter" class="form-select custom-select">
+                <option value="any">📊 Any Status</option>
+                <option value="ongoing">🔄 Ongoing</option>
+                <option value="completed">✅ Completed</option>
+                <option value="hiatus">⏸️ On Hiatus</option>
+              </select>
+            </div>
+            <div class="col-md-6 mb-3">
+              <label class="form-label fw-semibold">
+                <i class="fas fa-star me-2"></i>Minimum Rating
+              </label>
+              <select id="ratingFilter" class="form-select custom-select">
+                <option value="any">⭐ Any Rating</option>
+                <option value="4.5">⭐⭐⭐⭐⭐ 4.5+</option>
+                <option value="4.0">⭐⭐⭐⭐ 4.0+</option>
+                <option value="3.5">⭐⭐⭐ 3.5+</option>
+                <option value="3.0">⭐⭐ 3.0+</option>
+              </select>
+            </div>
+          </div>
+
+          <!-- Action Buttons -->
+          <div class="row mb-4">
+            <div class="col-12">
+              <div class="button-grid">
+                <!-- Primary Generate Button -->
+                <button type="button" class="btn btn-primary btn-lg generate-btn" onclick="findWebtoon()">
+                  <i class="fas fa-search me-2"></i>Find New Read (Live API)
+                </button>
+                
+                <!-- Secondary Actions -->
+                <div class="secondary-buttons">
+                  <button type="button" class="btn btn-outline-info action-btn" onclick="surpriseMe()">
+                    <i class="fas fa-dice me-2"></i>Surprise Me
+                  </button>
+                  <button type="button" class="btn btn-outline-warning action-btn" onclick="resetFilters()">
+                    <i class="fas fa-undo me-2"></i>Reset Filters
+                  </button>
+                  <button type="button" class="btn btn-outline-secondary action-btn" onclick="viewWishlist()">
+                    <i class="fas fa-list me-2"></i>My Wishlist
+                  </button>
+                  <button type="button" class="btn btn-outline-danger action-btn" onclick="resetStats()">
+                    <i class="fas fa-trash me-2"></i>Reset Stats
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Reading Stats -->
+          <div class="row mb-4">
+            <div class="col-12">
+              <div class="stats-panel">
+                <h6 class="stats-title mb-3"><i class="fas fa-chart-line me-2"></i>Reading Statistics</h6>
+                <div class="row text-center">
+                  <div class="col-6 col-md-3">
+                    <div class="stat-item">
+                      <span class="stat-number" id="discoveredCount">0</span>
+                      <span class="stat-label">Discovered</span>
+                    </div>
+                  </div>
+                  <div class="col-6 col-md-3">
+                    <div class="stat-item">
+                      <span class="stat-number" id="wishlistCount">0</span>
+                      <span class="stat-label">Wishlist</span>
+                    </div>
+                  </div>
+                  <div class="col-6 col-md-3">
+                    <div class="stat-item">
+                      <span class="stat-number" id="readCount">0</span>
+                      <span class="stat-label">Completed</span>
+                    </div>
+                  </div>
+                  <div class="col-6 col-md-3">
+                    <div class="stat-item">
+                      <span class="stat-number" id="favoriteGenre">-</span>
+                      <span class="stat-label">Top Genre</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Footer Navigation -->
+          <div class="row">
+            <div class="col-12 text-center">
+              <a href="{% url 'home' %}" class="btn btn-outline-dark btn-sm back-btn">
+                <i class="fas fa-arrow-left me-2"></i>Back to Home
+              </a>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- Info Cards -->
+      <div class="row mt-4">
+        <div class="col-md-4 mb-3">
+          <div class="card info-card border-0">
+            <div class="card-body text-center">
+              <i class="fas fa-satellite-dish text-primary mb-2" style="font-size: 2rem;"></i>
+              <h6 class="card-title">Live API Data</h6>
+              <small class="text-muted">Real-time recommendations from MyAnimeList, Jikan, and Reddit APIs</small>
+            </div>
+          </div>
+        </div>
+        <div class="col-md-4 mb-3">
+          <div class="card info-card border-0">
+            <div class="card-body text-center">
+              <i class="fas fa-heart text-danger mb-2" style="font-size: 2rem;"></i>
+              <h6 class="card-title">Personal Wishlist</h6>
+              <small class="text-muted">Save and track your reading list with personalized recommendations</small>
+            </div>
+          </div>
+        </div>
+        <div class="col-md-4 mb-3">
+          <div class="card info-card border-0">
+            <div class="card-body text-center">
+              <i class="fas fa-sync-alt text-success mb-2" style="font-size: 2rem;"></i>
+              <h6 class="card-title">Always Fresh</h6>
+              <small class="text-muted">Constantly updated content from multiple reliable sources</small>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<style>
+/* Modern Styling for Webtoon Recommendations */
+.text-gradient {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.main-card {
+  border-radius: 20px;
+  background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+  overflow: hidden;
+}
+
+.dark-theme .main-card {
+  background: linear-gradient(135deg, #2c3e50 0%, #3498db 100%);
+}
+
+.api-status-bar {
+  background: rgba(255,255,255,0.8);
+  border-radius: 12px;
+  padding: 1rem;
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255,255,255,0.2);
+}
+
+.dark-theme .api-status-bar {
+  background: rgba(0,0,0,0.2);
+  border: 1px solid rgba(255,255,255,0.1);
+}
+
+.api-indicators {
+  display: flex;
+  gap: 0.75rem;
+}
+
+.indicator {
+  font-size: 0.8rem;
+  color: #666;
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+.indicator .fas {
+  font-size: 0.6rem;
+  color: #ccc;
+}
+
+.indicator.active .fas {
+  color: #28a745;
+}
+
+.indicator.fetching .fas {
+  color: #ffc107;
+  animation: pulse 1s infinite;
+}
+
+.indicator.success .fas {
+  color: #28a745;
+}
+
+.indicator.error .fas {
+  color: #dc3545;
+}
+
+.webtoon-display {
+  min-height: 350px;
+  border-radius: 15px;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.1);
+  transition: all 0.3s ease;
+  padding: 2rem;
+}
+
+.webtoon-display:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 12px 40px rgba(0,0,0,0.15);
+}
+
+.loading-content {
+  text-align: center;
+  color: white;
+}
+
+.book-animation {
+  font-size: 4rem;
+  animation: bookFlip 3s infinite;
+  margin-bottom: 1rem;
+}
+
+@keyframes bookFlip {
+  0%, 100% { transform: rotateY(0deg); }
+  50% { transform: rotateY(180deg); }
+}
+
+.loading-title {
+  font-weight: 600;
+  margin-bottom: 0.5rem;
+  font-size: 1.5rem;
+}
+
+.loading-subtitle {
+  margin-bottom: 0;
+  opacity: 0.9;
+  font-size: 1rem;
+}
+
+.webtoon-content {
+  width: 100%;
+  color: white;
+  animation: fadeIn 0.5s ease;
+}
+
+.webtoon-cover {
+  text-align: center;
+}
+
+.cover-placeholder {
+  width: 100%;
+  height: 200px;
+  background: linear-gradient(135deg, #FF6B6B, #FF8E8E);
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 1rem;
+  box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+  position: relative;
+  overflow: hidden;
+}
+
+.cover-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 12px;
+}
+
+.cover-icon {
+  font-size: 3rem;
+  color: white;
+  opacity: 0.8;
+}
+
+.rating-display {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+}
+
+.stars {
+  font-size: 1.2rem;
+}
+
+.rating-text {
+  font-weight: 600;
+  font-size: 1.1rem;
+}
+
+.webtoon-header {
+  margin-bottom: 1rem;
+}
+
+.webtoon-title {
+  font-size: 1.8rem;
+  font-weight: 700;
+  margin-bottom: 0.5rem;
+  color: #ffffff;
+}
+
+.webtoon-badges {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+  margin-bottom: 1rem;
+}
+
+.type-badge {
+  background: linear-gradient(135deg, #FF6B6B, #FF8E8E);
+}
+
+.status-badge {
+  background: linear-gradient(135deg, #4ECDC4, #44A08D);
+}
+
+.genre-badge {
+  background: linear-gradient(135deg, #A8E6CF, #7FCDCD);
+}
+
+.source-badge {
+  background: linear-gradient(135deg, #FFD93D, #FF6B9D);
+  font-weight: 600;
+}
+
+.description-text {
+  font-size: 1rem;
+  line-height: 1.6;
+  margin-bottom: 1rem;
+  opacity: 0.95;
+}
+
+.meta-info {
+  background: rgba(255,255,255,0.1);
+  border-radius: 8px;
+  padding: 1rem;
+  margin-bottom: 1rem;
+}
+
+.meta-info small {
+  display: block;
+  margin-bottom: 0.5rem;
+  opacity: 0.9;
+}
+
+.tags-display h6 {
+  color: #FFD93D;
+  font-weight: 600;
+  margin-bottom: 1rem;
+}
+
+.tags-container {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.tag-item {
+  background: rgba(255,255,255,0.2);
+  padding: 0.25rem 0.5rem;
+  border-radius: 15px;
+  font-size: 0.8rem;
+  color: white;
+}
+
+.action-buttons-inline {
+  display: flex;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.custom-select {
+  border-radius: 10px;
+  border: 2px solid transparent;
+  background: white;
+  padding: 0.75rem 1rem;
+  font-weight: 500;
+  transition: all 0.2s ease;
+}
+
+.custom-select:focus {
+  border-color: #667eea;
+  box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.25);
+  background: white;
+}
+
+.dark-theme .custom-select {
+  background: #2c3e50;
+  color: white;
+  border-color: #34495e;
+}
+
+.button-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.generate-btn {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  border: none;
+  border-radius: 12px;
+  padding: 1rem 2rem;
+  font-weight: 600;
+  font-size: 1.1rem;
+  transition: all 0.3s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.generate-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4);
+}
+
+.generate-btn:active {
+  transform: translateY(0);
+}
+
+.generate-btn:disabled {
+  opacity: 0.6;
+  transform: none;
+  cursor: not-allowed;
+}
+
+.secondary-buttons {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: 0.75rem;
+}
+
+.action-btn {
+  border-radius: 10px;
+  padding: 0.75rem 1rem;
+  font-weight: 500;
+  transition: all 0.2s ease;
+  border-width: 2px;
+}
+
+.action-btn:hover {
+  transform: translateY(-1px);
+}
+
+.stats-panel {
+  background: rgba(255,255,255,0.9);
+  border-radius: 12px;
+  padding: 1.5rem;
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255,255,255,0.2);
+}
+
+.dark-theme .stats-panel {
+  background: rgba(0,0,0,0.3);
+  border: 1px solid rgba(255,255,255,0.1);
+}
+
+.stats-title {
+  color: #667eea;
+  font-weight: 600;
+}
+
+.dark-theme .stats-title {
+  color: #a8e6cf;
+}
+
+.stat-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.stat-number {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #667eea;
+}
+
+.stat-label {
+  font-size: 0.875rem;
+  color: #666;
+  margin-top: 0.25rem;
+}
+
+.dark-theme .stat-label {
+  color: #ccc;
+}
+
+.back-btn {
+  border-radius: 20px;
+  padding: 0.5rem 1.5rem;
+  font-weight: 500;
+  transition: all 0.2s ease;
+}
+
+.info-card {
+  background: rgba(255,255,255,0.8);
+  backdrop-filter: blur(10px);
+  border-radius: 12px;
+  transition: transform 0.2s ease;
+}
+
+.info-card:hover {
+  transform: translateY(-3px);
+}
+
+.dark-theme .info-card {
+  background: rgba(0,0,0,0.2);
+}
+
+/* Success state styling */
+.webtoon-display.loaded {
+  background: linear-gradient(135deg, #56ab2f 0%, #a8e6cf 100%);
+}
+
+/* Animation for content loading */
+@keyframes fadeIn {
+  from { opacity: 0; transform: scale(0.95); }
+  to { opacity: 1; transform: scale(1); }
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.5; }
+}
+
+/* Responsive Adjustments */
+@media (max-width: 768px) {
+  .webtoon-display {
+    min-height: 300px;
+    padding: 1rem;
+  }
+  
+  .webtoon-title {
+    font-size: 1.4rem;
+  }
+  
+  .cover-placeholder {
+    height: 150px;
+  }
+  
+  .secondary-buttons {
+    grid-template-columns: 1fr;
+  }
+  
+  .generate-btn {
+    padding: 0.875rem 1.5rem;
+    font-size: 1rem;
+  }
+
+  .action-buttons-inline {
+    justify-content: center;
+    flex-direction: column;
+  }
+
+  .api-indicators {
+    flex-direction: column;
+    gap: 0.25rem;
+  }
+}
+
+@media (max-width: 576px) {
+  .webtoon-badges {
+    justify-content: center;
+  }
+  
+  .badge {
+    font-size: 0.8rem;
+    padding: 0.3rem 0.6rem;
+  }
+  
+  .display-5 {
+    font-size: 1.8rem;
+  }
+}
+</style>
+
+<script>
+/* Enhanced Webtoon & Manhwa Recommendation System with Real-time API */
+(function() {
+  let currentWebtoon = null;
+  let discoveredCount = parseInt(localStorage.getItem('discoveredCount') || '0');
+  let wishlistCount = parseInt(localStorage.getItem('wishlistCount') || '0');
+  let readCount = parseInt(localStorage.getItem('readCount') || '0');
+  let genreStats = JSON.parse(localStorage.getItem('genreStats') || '{}');
+  let wishlist = JSON.parse(localStorage.getItem('webtoonWishlist') || '[]');
+
+  function updateStats() {
+    document.getElementById('discoveredCount').textContent = discoveredCount;
+    document.getElementById('wishlistCount').textContent = wishlistCount;
+    document.getElementById('readCount').textContent = readCount;
+    
+    // Find most popular genre
+    const topGenre = Object.keys(genreStats).reduce((a, b) => 
+      genreStats[a] > genreStats[b] ? a : b, 'None'
+    );
+    document.getElementById('favoriteGenre').textContent = topGenre || '-';
+    
+    // Save to localStorage
+    localStorage.setItem('discoveredCount', discoveredCount.toString());
+    localStorage.setItem('wishlistCount', wishlistCount.toString());
+    localStorage.setItem('readCount', readCount.toString());
+    localStorage.setItem('genreStats', JSON.stringify(genreStats));
+    localStorage.setItem('webtoonWishlist', JSON.stringify(wishlist));
+  }
+
+  function updateApiIndicators(source) {
+    // Reset all indicators
+    const indicators = ['malIndicator', 'jikanIndicator', 'redditIndicator', 'curatedIndicator'];
+    indicators.forEach(id => {
+      const element = document.getElementById(id);
+      element.classList.remove('active', 'fetching', 'success', 'error');
+    });
+
+    // Set active indicator based on source
+    const sourceMap = {
+      'MAL API': 'malIndicator',
+      'Jikan API': 'jikanIndicator',
+      'Reddit Community': 'redditIndicator',
+      'Curated Database': 'curatedIndicator'
+    };
+
+    const activeIndicator = sourceMap[source];
+    if (activeIndicator) {
+      document.getElementById(activeIndicator).classList.add('success');
+    }
+
+    // Update API source text
+    document.getElementById('apiSource').textContent = `Fetched from: ${source}`;
+  }
+
+  function setIndicatorStatus(indicatorId, status) {
+    const element = document.getElementById(indicatorId);
+    element.classList.remove('active', 'fetching', 'success', 'error');
+    element.classList.add(status);
+  }
+
+  function showLoading(show = true, message = 'Fetching live recommendations...') {
+    const loading = document.getElementById('loadingText');
+    const content = document.getElementById('webtoonContent');
+    const container = document.getElementById('webtoonContainer');
+    const generateBtn = document.querySelector('.generate-btn');
+    
+    if (show) {
+      loading.style.display = 'block';
+      content.style.display = 'none';
+      container.className = 'webtoon-display position-relative';
+      generateBtn.disabled = true;
+      generateBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Fetching...';
+      
+      loading.innerHTML = `
+        <div class="book-animation">📡</div>
+        <h5 class="loading-title">${message}</h5>
+        <p class="loading-subtitle">Connecting to live APIs...</p>
+      `;
+
+      // Show fetching status for all indicators
+      setIndicatorStatus('malIndicator', 'fetching');
+      setIndicatorStatus('jikanIndicator', 'fetching');
+      setIndicatorStatus('redditIndicator', 'fetching');
+      
+    } else {
+      loading.style.display = 'none';
+      content.style.display = 'block';
+      container.classList.add('loaded');
+      generateBtn.disabled = false;
+      generateBtn.innerHTML = '<i class="fas fa-search me-2"></i>Find New Read (Live API)';
+    }
+  }
+
+  function generateStars(rating) {
+    const fullStars = Math.floor(rating);
+    const halfStar = rating % 1 >= 0.5;
+    let stars = '';
+    
+    for (let i = 0; i < fullStars; i++) {
+      stars += '⭐';
+    }
+    if (halfStar) stars += '⭐';
+    
+    return stars;
+  }
+
+  function displayWebtoon(webtoon) {
+    document.getElementById('webtoonTitle').textContent = webtoon.title;
+    document.getElementById('webtoonDescription').textContent = webtoon.description;
+    document.getElementById('authorName').textContent = webtoon.author;
+    document.getElementById('releaseYear').textContent = webtoon.year;
+    document.getElementById('chapterCount').textContent = webtoon.chapters;
+    document.getElementById('originCountry').textContent = webtoon.origin;
+    
+    // Update tags
+    document.getElementById('typeTag').textContent = webtoon.type.toUpperCase();
+    document.getElementById('statusTag').textContent = webtoon.status.toUpperCase();
+    document.getElementById('genreTag').textContent = webtoon.genre.toUpperCase();
+    document.getElementById('sourceTag').textContent = webtoon.source || 'CURATED';
+    
+    // Update rating
+    document.getElementById('ratingStars').textContent = generateStars(webtoon.rating);
+    document.getElementById('ratingScore').textContent = webtoon.rating.toFixed(1);
+    
+    // Handle cover image
+    const coverImage = document.getElementById('coverImageSrc');
+    const coverIcon = document.querySelector('.cover-icon');
+    
+    if (webtoon.image_url) {
+      coverImage.src = webtoon.image_url;
+      coverImage.style.display = 'block';
+      coverIcon.style.display = 'none';
+      
+      coverImage.onerror = function() {
+        this.style.display = 'none';
+        coverIcon.style.display = 'block';
+      };
+    } else {
+      coverImage.style.display = 'none';
+      coverIcon.style.display = 'block';
+    }
+    
+    // Show tags if available
+    if (webtoon.tags && webtoon.tags.length > 0) {
+      const tagsDisplay = document.getElementById('tagsDisplay');
+      const tagsList = document.getElementById('tagsList');
+      
+      tagsList.innerHTML = '';
+      webtoon.tags.forEach(tag => {
+        const tagElement = document.createElement('span');
+        tagElement.className = 'tag-item';
+        tagElement.textContent = tag;
+        tagsList.appendChild(tagElement);
+      });
+      
+      tagsDisplay.style.display = 'block';
+    } else {
+      document.getElementById('tagsDisplay').style.display = 'none';
+    }
+    
+    // Show external link button if available
+    const externalBtn = document.getElementById('externalBtn');
+    if (webtoon.url) {
+      externalBtn.style.display = 'inline-block';
+      externalBtn.onclick = () => window.open(webtoon.url, '_blank');
+    } else {
+      externalBtn.style.display = 'none';
+    }
+
+    // Update API source indicator
+    updateApiIndicators(webtoon.source || 'Curated Database');
+  }
+
+  window.findWebtoon = async function() {
+    showLoading(true);
+    
+    try {
+      const genre = document.getElementById('genreFilter').value;
+      const type = document.getElementById('typeFilter').value;
+      const status = document.getElementById('statusFilter').value;
+      const rating = document.getElementById('ratingFilter').value;
+      
+      const params = new URLSearchParams({
+        genre: genre,
+        type: type,
+        status: status,
+        rating: rating
+      });
+      
+      const response = await fetch(`/api/webtoons/?${params}`);
+      
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || `Server error: ${response.status}`);
+      }
+      
+      const webtoonData = await response.json();
+      currentWebtoon = webtoonData;
+      
+      // Update stats
+      discoveredCount++;
+      genreStats[webtoonData.genre] = (genreStats[webtoonData.genre] || 0) + 1;
+      updateStats();
+      
+      showLoading(false);
+      displayWebtoon(webtoonData);
+      
+    } catch (error) {
+      console.error('Error finding webtoon:', error);
+      showLoading(false);
+      document.getElementById('loadingText').innerHTML = `
+        <div class="text-center">
+          <i class="fas fa-exclamation-triangle mb-3" style="font-size: 3rem;"></i>
+          <h5 class="loading-title">Oops! Something went wrong</h5>
+          <p class="loading-subtitle">${error.message}</p>
+          <button class="btn btn-outline-light btn-sm mt-2" onclick="findWebtoon()">
+            <i class="fas fa-redo me-1"></i>Try Again
+          </button>
+        </div>
+      `;
+    }
+  };
+
+  window.surpriseMe = function() {
+    // Reset all filters to 'any'
+    document.getElementById('genreFilter').value = 'any';
+    document.getElementById('typeFilter').value = 'any';
+    document.getElementById('statusFilter').value = 'any';
+    document.getElementById('ratingFilter').value = 'any';
+    findWebtoon();
+  };
+
+  window.resetFilters = function() {
+    document.getElementById('genreFilter').value = 'any';
+    document.getElementById('typeFilter').value = 'any';
+    document.getElementById('statusFilter').value = 'any';
+    document.getElementById('ratingFilter').value = 'any';
+    showNotification('Filters reset successfully!', 'info');
+  };
+
+  window.addToWishlist = function() {
+    if (!currentWebtoon) {
+      showNotification('No webtoon to save! Find one first.', 'warning');
+      return;
+    }
+
+    // Check if already in wishlist
+    if (wishlist.some(item => item.title === currentWebtoon.title)) {
+      showNotification('Already in your wishlist!', 'info');
+      return;
+    }
+
+    wishlist.push({
+      ...currentWebtoon,
+      addedAt: new Date().toISOString()
+    });
+    
+    wishlistCount++;
+    updateStats();
+    
+    showNotification('Added to wishlist!', 'success');
+  };
+
+  window.markAsRead = function() {
+    if (!currentWebtoon) {
+      showNotification('No webtoon to mark! Find one first.', 'warning');
+      return;
+    }
+
+    readCount++;
+    updateStats();
+    
+    showNotification('Marked as read! 📚', 'success');
+  };
+
+  window.shareWebtoon = function() {
+    if (!currentWebtoon) {
+      showNotification('No webtoon to share! Find one first.', 'warning');
+      return;
+    }
+
+    const shareText = `📚 Check out this amazing ${currentWebtoon.type}: "${currentWebtoon.title}" by ${currentWebtoon.author}\n\n${currentWebtoon.description}\n\n⭐ Rating: ${currentWebtoon.rating}/5\n🏷️ Genre: ${currentWebtoon.genre}\n📡 Source: ${currentWebtoon.source}`;
+
+    if (navigator.share) {
+      navigator.share({
+        title: currentWebtoon.title,
+        text: shareText,
+        url: currentWebtoon.url || window.location.href
+      });
+    } else {
+      navigator.clipboard.writeText(shareText).then(() => {
+        showNotification('Recommendation copied to clipboard!', 'success');
+      });
+    }
+  };
+
+  window.openExternal = function() {
+    if (currentWebtoon && currentWebtoon.url) {
+      window.open(currentWebtoon.url, '_blank');
+    }
+  };
+
+  window.viewWishlist = function() {
+    if (wishlist.length === 0) {
+      showNotification('Your wishlist is empty! Add some webtoons first.', 'info');
+      return;
+    }
+    
+    const titles = wishlist.map(item => `• ${item.title} (${item.type}) - ${item.source || 'Curated'}`).join('\n');
+    alert(`📚 Your Wishlist (${wishlist.length} items):\n\n${titles}`);
+  };
+
+  window.resetStats = function() {
+    if (confirm('Are you sure you want to reset all statistics and wishlist? This action cannot be undone.')) {
+      discoveredCount = 0;
+      wishlistCount = 0;
+      readCount = 0;
+      genreStats = {};
+      wishlist = [];
+      updateStats();
+      showNotification('All data reset successfully!', 'success');
+    }
+  };
+
+  function showNotification(message, type = 'info') {
+    const notification = document.createElement('div');
+    notification.className = `alert alert-${type === 'error' ? 'danger' : type} notification`;
+    notification.textContent = message;
+    notification.style.cssText = `
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      z-index: 9999;
+      animation: slideIn 0.3s ease;
+      max-width: 300px;
+    `;
+    
+    document.body.appendChild(notification);
+    setTimeout(() => {
+      notification.style.animation = 'slideOut 0.3s ease';
+      setTimeout(() => notification.remove(), 300);
+    }, 3000);
+  }
+
+  // Initialize
+  document.addEventListener('DOMContentLoaded', function() {
+    updateStats();
+  });
+
+  // Add CSS for notifications
+  const style = document.createElement('style');
+  style.textContent = `
+    @keyframes slideIn {
+      from { transform: translateX(100%); opacity: 0; }
+      to { transform: translateX(0); opacity: 1; }
+    }
+    @keyframes slideOut {
+      from { transform: translateX(0); opacity: 1; }
+      to { transform: translateX(100%); opacity: 0; }
+    }
+  `;
+  document.head.appendChild(style);
+
+})();
+</script>
+
+<!-- Font Awesome for icons -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+{% endblock %}

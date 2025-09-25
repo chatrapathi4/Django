@@ -1,0 +1,189 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="d-flex justify-content-center align-items-center" style="min-height: 80vh;">
+  <div class="card shadow" style="width: 24rem;">
+    <div class="card-body">
+      <h4 class="card-title text-center mb-4">{{ title }}</h4>
+      <form action="{% url 'calculate' %}" method="post">
+        {% csrf_token %}
+        <input type="hidden" name="calc_type" value="simple">
+
+        <!-- Expression input (editable) -->
+        <div class="mb-3">
+          <input type="text" class="form-control form-control-lg text-end mb-2"
+                 name="expression" id="expression" placeholder="0" value="{{ expression|default:'' }}" autocomplete="off" autofocus>
+        </div>
+
+        <!-- Result display (readonly, not submitted) -->
+        <div class="mb-3">
+          <input type="text" class="form-control form-control-lg text-end mb-2"
+                 id="result_display" placeholder="Ans=" readonly value="{{ result|default:'' }}">
+        </div>
+
+        <div class="calculator-grid">
+          <button type="button" class="btn btn-light calc-btn" onclick="appendToExpression('7')">7</button>
+          <button type="button" class="btn btn-light calc-btn" onclick="appendToExpression('8')">8</button>
+          <button type="button" class="btn btn-light calc-btn" onclick="appendToExpression('9')">9</button>
+          <button type="button" class="btn btn-info calc-btn" onclick="appendToExpression('/')">/</button>
+          
+          <button type="button" class="btn btn-light calc-btn" onclick="appendToExpression('4')">4</button>
+          <button type="button" class="btn btn-light calc-btn" onclick="appendToExpression('5')">5</button>
+          <button type="button" class="btn btn-light calc-btn" onclick="appendToExpression('6')">6</button>
+          <button type="button" class="btn btn-info calc-btn" onclick="appendToExpression('*')">×</button>
+          
+          <button type="button" class="btn btn-light calc-btn" onclick="appendToExpression('1')">1</button>
+          <button type="button" class="btn btn-light calc-btn" onclick="appendToExpression('2')">2</button>
+          <button type="button" class="btn btn-light calc-btn" onclick="appendToExpression('3')">3</button>
+          <button type="button" class="btn btn-info calc-btn" onclick="appendToExpression('-')">-</button>
+          
+          <button type="button" class="btn btn-light calc-btn" onclick="appendToExpression('0')">0</button>
+          <button type="button" class="btn btn-light calc-btn" onclick="appendToExpression('.')">.</button>
+          <button type="button" class="btn btn-danger calc-btn" onclick="clearExpression()">C</button>
+          <button type="button" class="btn btn-info calc-btn" onclick="appendToExpression('+')">+</button>
+
+          <button type="button" class="btn btn-warning calc-btn btn-undo" onclick="undoExpression()">⌫</button>
+          <button type="submit" class="btn btn-success calc-equals">=</button>
+          <a href="{% url 'home' %}" class="btn btn-secondary calc-btn">Back</a>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<style>
+  .calculator-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap:8px; padding:10px; }
+
+  /* general calc buttons */
+  .calc-btn {
+    height: 52px;           /* change button height */
+    font-size: 1.15rem;     /* change text size */
+    border-radius: 12px;
+    transition: transform .12s ease, background-color .15s ease;
+  }
+
+  /* equals button smaller / narrower */
+  .calc-equals {
+    grid-column: span 2;    /* adjust span if needed */
+    height: 46px;
+    font-size: 1rem;
+    padding: 0.35rem 0.6rem;
+  }
+
+  /* undo specific */
+  .btn-undo {
+    height: 46px;
+    font-size: 1rem;
+    padding: 0.25rem 0.5rem;
+  }
+
+  /* dark-theme overrides (keeps theme consistent) */
+  .dark-theme .calc-btn { background:#3a3a3a; color:#eee; border-color:#4a4a4a; }
+  .dark-theme .btn-undo { background:#05aab0; color:#111; }
+  .dark-theme .calc-equals { background:#1e7a3a; color:#fff; }
+
+  /* light-theme overrides (add these) */
+  .light-theme .calc-btn { background:#ffffff; color:#111; border-color:#dddddd; }
+  .light-theme .btn-undo { background:#ffffff; color:#111; border-color:#dddddd; }
+  .light-theme .calc-equals { background:#28a745; color:#fff; border-color:#218838; }
+</style>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+/* helper: insert text at caret */
+function insertAtCaret(input, text) {
+  const start = input.selectionStart || 0;
+  const end = input.selectionEnd || 0;
+  const val = input.value;
+  input.value = val.slice(0, start) + text + val.slice(end);
+  const pos = start + text.length;
+  input.setSelectionRange(pos, pos);
+  input.focus();
+}
+
+/* called by buttons */
+function appendToExpression(value) {
+  const input = document.getElementById('expression');
+  insertAtCaret(input, value);
+  // clear result when user continues typing
+  const out = document.getElementById('result_display');
+  if (out) out.value = '';
+}
+
+/* clear */
+function clearExpression() {
+  const input = document.getElementById('expression');
+  input.value = '';
+  const out = document.getElementById('result_display');
+  if (out) out.value = '';
+  input.focus();
+}
+
+/* undo: delete char before caret or delete selection */
+function undoExpression() {
+  const input = document.getElementById('expression');
+  const start = input.selectionStart || 0;
+  const end = input.selectionEnd || 0;
+  if (start === end) {
+    if (start === 0) return;
+    input.value = input.value.slice(0, start - 1) + input.value.slice(end);
+    input.setSelectionRange(start - 1, start - 1);
+  } else {
+    input.value = input.value.slice(0, start) + input.value.slice(end);
+    input.setSelectionRange(start, start);
+  }
+  // clear shown result when editing
+  const out = document.getElementById('result_display');
+  if (out) out.value = '';
+  input.focus();
+}
+
+/* keyboard handling and paste validation */
+document.addEventListener('DOMContentLoaded', () => {
+  const input = document.getElementById('expression');
+
+  /* Set focus and ensure server result is visible (if any) */
+  if (input) input.focus();
+  const out = document.getElementById('result_display');
+  if (out && "{{ result|default:'' }}" !== "") {
+    out.value = "{{ result|default:'' }}";
+  }
+
+  /* restrict keys to safe set; allow navigation + editing keys */
+  input.addEventListener('keydown', (e) => {
+    const navKeys = ['Backspace','Delete','ArrowLeft','ArrowRight','ArrowUp','ArrowDown','Home','End','Tab'];
+    if (navKeys.includes(e.key)) {
+      return; // allow default behavior
+    }
+    // Enter submits form
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      input.form.submit();
+      return;
+    }
+    // Ctrl+Z -> undoExpression
+    if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'z') {
+      e.preventDefault();
+      undoExpression();
+      return;
+    }
+    // Allow digits, operators, dot, parentheses, percent and space
+    if (!/^[0-9+\-*/%.() ]$/.test(e.key)) {
+      e.preventDefault();
+    }
+  });
+
+  /* block paste with invalid characters */
+  input.addEventListener('paste', (e) => {
+    const text = (e.clipboardData || window.clipboardData).getData('text');
+    if (!/^[0-9+\-*/%.() \r\n\t]+$/.test(text)) {
+      e.preventDefault();
+    }
+  });
+
+  /* when clicking buttons we ensure caret focus */
+  const buttons = document.querySelectorAll('.calculator-grid .calc-btn');
+  buttons.forEach(btn => btn.addEventListener('click', () => input.focus()));
+});
+</script>
+{% endblock %}

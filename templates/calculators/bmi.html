@@ -1,0 +1,35 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="d-flex justify-content-center align-items-center" style="min-height: 80vh;">
+  <div class="card shadow" style="width: 22rem;">
+    <div class="card-body">
+      <h4 class="card-title text-center mb-4">{{ title|default:"BMI Calculator" }}</h4>
+
+      <form action="{% url 'calculate' %}" method="post">
+        {% csrf_token %}
+        <input type="hidden" name="calc_type" value="bmi">
+
+        <div class="mb-3">
+          <label class="form-label">Weight (kg)</label>
+          <input name="weight" id="weight" class="form-control" inputmode="decimal" value="{{ request.POST.weight|default:'' }}" required>
+        </div>
+
+        <div class="mb-3">
+          <label class="form-label">Height (cm)</label>
+          <input name="height" id="height" class="form-control" inputmode="decimal" value="{{ request.POST.height|default:'' }}" required>
+        </div>
+
+        <div class="mb-3">
+          <input type="text" id="result_display" placeholder="Ans=" class="form-control form-control-lg text-end mb-2" readonly value="{{ result|default:'' }}">
+        </div>
+
+        <div class="d-grid gap-2">
+          <button type="submit" class="btn btn-success">Calculate BMI</button>
+          <a href="{% url 'home' %}" class="btn btn-secondary">Back</a>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+{% include 'calculators/_shared_js.html' %}
+{% endblock %}

@@ -27,7 +27,7 @@ SECRET_KEY = os.getenv("DJANGO_SECRET_KEY", "django-insecure-3i75w$c)qa@^ffu#5mu
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = os.getenv("DJANGO_DEBUG", "False") == "True"
 
-ALLOWED_HOSTS = ['MyFirstDjango-19.onrender.com']
+ALLOWED_HOSTS = ['django-2-ix6m.onrender.com']
 #gunicorn == 22.0.0
 # Application definition
 
